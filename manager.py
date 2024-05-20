@@ -48,13 +48,13 @@ def purge_data():
                         file_path = os.path.join(data_path, filename)
                         os.unlink(file_path) #deleting the data
                     print('All data purged.')
-                    break
             elif confirmation.lower() == 'no':
                 print('Operation cancelled.')
             else:
                 print('Please enter a valid answer.')
         except Exception as error:
             print(f'An uexpected error occured: {error}')
+        break
         
         
 if __name__ == '__main__':
