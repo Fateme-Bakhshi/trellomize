@@ -1,5 +1,5 @@
 from Users.user import UserManager
-import re
+import re #for checking email
 
 class validService:
     def __init__(self):
@@ -17,34 +17,34 @@ class validService:
         while True:
             if(self.is_valid_email(Email)):
                 try:
-                    self.user_manager.add_user(Username, Password, Email)
+                    user = self.user_manager.add_user(Username, Password, Email)
                     print(f'You signed up successfully {Username}!')
-                    break
-                except ValueError as e:
-                    print(e)
+                    return user
+                except ValueError as error:
+                    print(error)
             else:
                 print('Please enter a valid email.')
     
     def log_in(self, Username, Password):
-        user = self.user_manager.authenticate(Username, Password)
-        try:
-            if user:
-                if user.active :
-                    print(f'Welcome back {Username}!')
-                    return user
+        user = self.user_manager.load_user(Username, Password)
+        while True:
+            try:
+                if user:
+                    if user.active :
+                        print(f'Welcome back {Username}!')
+                        return user
+                    else:
+                        print(f'{Username} is inactivate.')
                 else:
-                    print(f'{Username} is inactivate.')
-            else:
-                print('Invalid username or password.')
-            return None
-        except Exception as error:
-            print(f'An unexpected error occured: {error}')
+                    print('Invalid username or password.')
+            except Exception as error:
+                print(f'An unexpected error occured: {error}')
     
-    def deactivate_user(self, Username):
-        user = self.user_manager.find_user(Username)
+    def deactivate_user(self, Username, Password):
+        user = self.user_manager.load_user(Username, Password)
         if user:
             user.active = False
-            self.user_manager.save_users()
+            self.user_manager.save_users(user)
             print(f'{Username} has been successfully deactivated.')
             return user
         else:
