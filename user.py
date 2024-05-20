@@ -45,34 +45,46 @@ class User:
         return PreUser
     
 class UserManager:
-    def __init__(self, data_file = 'Data\\Users.json'):
-        self.data_file = Path(data_file)
-        self.users = self.load_users()
+    def __init__(self, data_files = 'Data\\Users'):
+        self.data_file = Path(data_files)
+        self.user = self.load_user()
     
-    def find_user(self, Username):
-        for user in self.users:
-            if user == Username:
-                return user
-        return None
+    def find_user(self, username):
+        usernames_data = self.data_files / 'Usernames.json'
+        with open(usernames_data, 'r') as input:
+            usernames = input.read().split()
+        return username in usernames
+    
+    def load_user(self, username, password):
+        if self.is_it_theaUser(username, password):
+            try:
+                the_user_data = self.data_file / f'{username}.json'
+                with open(the_user_data, 'r') as input:
+                    return json.load(input)
+            except Exception as error:
+                print(f'There is an error: {error}')
+        else:
+            return None
         
-    def load_users(self):
+    def save_user(self, user):
         try:
-            with open(self.data_file, 'r') as input:
-                return [User.pre_users(user) for user in json.load(input)]
+            the_user_data = self.data_file / f'{user.get('Username')}.json'
+            with open(the_user_data, 'w') as output:
+                json.dump(output)
         except Exception as error:
-            print(f'There is an error: {error}')
-            return []
+            print(f'An error occured: {error}')
+            
+    def add_user(self, username, password, email):
+        if self.find_user(username):
+            raise ValueError('Username already exists.')
+        else:
+            user = User(username, password, email)
+            user = user.to_dic()
+            self.user = user
+            self.save_user(self)
+            return user
+            
+    def is_it_theUser(self, username, password):
+        return self.user.get('Username') == username and self.user.get('Password') == password
+            
     
-    def save_user(self):
-        try:
-            with open(self.data_file(), 'w') as output:
-                json.dump([user.to_save() for user in self.users] , output)
-        except Exception as error:
-            print(f'There is an error: {error}')
-    
-    def add_user(self, Username, Password, Email):
-        if self.find_user():
-            raise ValueError('Username already exists. Please enter a new one.')
-        user = User(Username, Password, Email)
-        self.users.append(user)
-        self.save_user()
