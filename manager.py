@@ -22,7 +22,7 @@ def find_manager(Username):
     try:
         with open(manager_file, 'r') as input:
             manager = json.load(input)
-            if manager[0].get('Username') == Username:
+            if manager.get('Username') == Username:
                 return True
             return False
     except Exception as error:
@@ -32,7 +32,7 @@ def find_manager(Username):
 def save_manager(Username, Password):
     try:
         with open(manager_file, 'w') as output:
-            json.dump([{'username' : Username, 'password' : Password}] , output)
+            json.dump({'Username' : Username, 'Password' : Password} , output)
     except Exception as error:
             print(f'There is an error: {error}')
             
