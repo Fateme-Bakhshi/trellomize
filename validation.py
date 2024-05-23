@@ -17,9 +17,10 @@ class validService:
             Email = input('Please enter a valid email: ')
         try:
             user = self.user_manager.add_user(Username, Password, Email)
-            print(f'You signed up successfully {Username}!')
-            time.sleep(1.5)
-            return user
+            if user:
+                print(f'You signed up successfully {Username}!')
+                time.sleep(1.5)
+                return user
         except ValueError as error:
             print(error)
             return None
@@ -29,11 +30,15 @@ class validService:
         user = self.user_manager.load_user(Username, Password)
         try:
             if user:
-                if user.activate :
+                if user.is_Manager and user.activate:
+                    print(f'Welcome back {Username}! \nYou logged in as manager.')
+                    time.sleep(3.5)
+                    return user            
+                elif user.activate :
                     print(f'Welcome back {Username}!')
                     time.sleep(2)
                     return user
-                else:
+                elif not user.activate:
                     print(f'{Username} is inactivate.')
                     time.sleep(2)
             else:
