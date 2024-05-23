@@ -5,11 +5,12 @@ from pathlib import Path #for file handling
 import time
 
 class User:
-    def __init__(self, username, password, email, active=True) :
+    def __init__(self, username, password, email, is_manager=False, active=True) :
         self.username = username
         self.password = self.hash_password(password)
         self.email = email
         self.activate = active
+        self.is_Manager = is_manager
     
     @staticmethod    
     def hash_password(password):         
@@ -38,31 +39,32 @@ class User:
                 'Username': self.username,
                 'Password': self.password,
                 'Email' : self.email,
-                'Active' : self.activate
+                'Active' : self.activate,
+                'Manager' : self.is_Manager
             }
         
     
 class UserManager:
     def __init__(self, data_files = 'Data\\Users'):
         self.data_file = Path(data_files)
-        self.user = User('', '', '', '')
+        self.user = User('', '', '')
     
     def find_user(self, username):
-        usernames_data = self.data_file / 'Usernames.json'
-        with open(usernames_data, 'r') as input:
-            usernames = json.load(input).split()
-        return username in usernames
+        usernames_data = Path(self.data_file / 'Usernames.json')
+        if os.path.getsize(usernames_data) > 0:
+            with open(usernames_data, 'r') as input:
+                usernames = json.load(input)
+            return username in usernames
+        return False
     
     def add_user(self, username, password, email):
         if self.find_user(username):
             print('Username already exists.')
             time.sleep(2)
         else:
-            user = User(username, password, email)
-            user = user.to_dict()
-            self.user = user
-            self.save_user(user)
-            return user
+            self.user = User(username, password, email)
+            self.save_user()
+            return self.user
     
     def load_user(self, username, password):
         try:
@@ -74,6 +76,7 @@ class UserManager:
             self.user.password = data['Password']
             self.user.email = data['Email']
             self.user.activate = data['Active']
+            self.user.is_Manager = data['Manager']
             
             if self.is_it_theUser(username, password):
                 return self.user
@@ -83,14 +86,24 @@ class UserManager:
             print(f'There is an error: {error}')
 
         
-    def save_user(self, user):
+    def save_user(self):
         try:
-            the_user_data = self.data_file / f"{user['Username']}.json"
+            the_user_data = self.data_file / f"{self.user.username}.json"
             usernames_file = self.data_file / "Usernames.json"
-            with open(the_user_data, 'w') as output:
-                json.dump(user, output)
-            with open(usernames_file, 'a') as name:
-                json.dump(user['Username'], name, indent=4)
+            user_to_save = self.user.to_dict()
+            
+            with open(the_user_data, 'w') as output: #Saving the user
+                json.dump(user_to_save, output)
+            
+            usernames = []
+            if os.path.getsize(usernames_file) > 0:
+                with open(usernames_file, 'r') as names: #Reading the usernames
+                    usernames = json.load(names)
+            usernames.append(self.user.username)
+            
+            with open(usernames_file, 'w') as name: #Saving updated usernames
+                json.dump(usernames, name)
+                
         except Exception as error:
             print(f'An error occured: {error}')
             
