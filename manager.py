@@ -2,6 +2,10 @@ import argparse #terminal management
 import json 
 import os
 from pathlib import Path
+from Users.user import User
+from Users.user import UserManager
+import hashlib
+
 
 
 manager_file = Path('Data\\Manager.json')
@@ -10,12 +14,14 @@ users_file = Path('Data\\Users')
 #task file
 
 def create_admin(Username, Password):
-
     if find_manager(Username):
         print('Admin already exists.')
+    elif os.path.getsize(manager_file) != 0:
+        save_manager(Username, hash_password(Password))
+        print('Admin updated successfully.')
     else:
+        save_manager(Username, hash_password(Password))
         print('Admin created successfully.')
-        save_manager(Username, Password)
 
 
 def find_manager(Username):
@@ -31,10 +37,20 @@ def find_manager(Username):
     
 def save_manager(Username, Password):
     try:
-        with open(manager_file, 'w') as output:
+        user_manager = UserManager() #Save as user
+        manager = User(Username, Password, " ", True)
+        user_manager.user = manager
+        user_manager.save_user()
+        
+        with open(manager_file, 'w') as output: #Save as manager
             json.dump({'Username' : Username, 'Password' : Password} , output)
     except Exception as error:
             print(f'There is an error: {error}')
+
+def hash_password(password):         
+    hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    return hashed_password
+
             
         
 def purge_data():
@@ -58,7 +74,7 @@ def purge_data():
         
         
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Project Management System Manager")
+    parser = argparse.ArgumentParser(description="Project Management System")
     subparsers = parser.add_subparsers(dest='command')
 
     create_admin_parser = subparsers.add_parser('create-admin')
