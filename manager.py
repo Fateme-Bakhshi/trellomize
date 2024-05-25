@@ -1,10 +1,8 @@
 import argparse #terminal management
-import json 
-import os
+import json , os, hashlib
 from pathlib import Path
 from Users.user import User
 from Users.user import UserManager
-import hashlib
 
 
 
@@ -13,24 +11,29 @@ users_file = Path('Data\\Users')
 #project file
 #task file
 
+def hash_password(password):         
+    hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    return hashed_password
+
 def create_admin(Username, Password):
     if find_manager(Username):
         print('Admin already exists.')
-    elif os.path.getsize(manager_file) != 0:
-        save_manager(Username, hash_password(Password))
+    elif os.path.exists(manager_file):
+        save_manager(Username, Password)
         print('Admin updated successfully.')
     else:
-        save_manager(Username, hash_password(Password))
+        save_manager(Username, Password)
         print('Admin created successfully.')
 
 
 def find_manager(Username):
     try:
-        with open(manager_file, 'r') as input:
-            manager = json.load(input)
-            if manager.get('Username') == Username:
-                return True
-            return False
+        if os.path.exists(manager_file):
+            with open(manager_file, 'r') as input:
+                manager = json.load(input)
+                if manager['Username'] == Username:
+                    return True
+                return False
     except Exception as error:
             print(f'There is an error: {error}')
             return False
@@ -39,30 +42,34 @@ def save_manager(Username, Password):
     try:
         user_manager = UserManager() #Save as user
         manager = User(Username, Password, " ", True)
-        user_manager.user = manager
-        user_manager.save_user()
+        user_manager.save_user(manager)
         
         with open(manager_file, 'w') as output: #Save as manager
-            json.dump({'Username' : Username, 'Password' : Password} , output)
+            user_to_save = manager.to_dict()
+            json.dump(user_to_save , output)
     except Exception as error:
             print(f'There is an error: {error}')
 
-def hash_password(password):         
-    hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
-    return hashed_password
-
-            
-        
 def purge_data():
     confirmation = input('Are you sure you want to purge all data? (yes/no):')
+    #with open(manager_file, 'r') as name:
+    #    manager = json.load(name)
+    #    manager_username = manager['Username']
+        
     while True:
         try:
             if confirmation.lower() == 'yes':
                 for data_path in [users_file #, project_file, #task_file 
                             ]:
                     for filename in os.listdir(data_path): #Get a list of all the files in the desired folder
-                        file_path = os.path.join(data_path, filename)
-                        os.unlink(file_path) #deleting the data
+                        #if filename != manager_username:
+                            file_path = os.path.join(data_path, filename)
+                            os.unlink(file_path) #deleting the data
+                        
+                    usernames = open('Data/Usernames.json', 'r+')
+                    usernames.seek(0)
+                    usernames.truncate() #deleting usernames
+                    
                     print('All data purged.')
             elif confirmation.lower() == 'no':
                 print('Operation cancelled.')
@@ -80,6 +87,7 @@ if __name__ == '__main__':
     create_admin_parser = subparsers.add_parser('create-admin')
     create_admin_parser.add_argument('--username', required=True)
     create_admin_parser.add_argument('--password', required=True)
+    
     purge_data_parser = subparsers.add_parser('purge-data')
 
     args = parser.parse_args()
