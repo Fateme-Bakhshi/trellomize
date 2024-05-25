@@ -1,7 +1,7 @@
 from Users.user import UserManager
-import os
-import re #for checking email
-import time
+import time, re #for checking email
+from rich.console import Console
+from rich.prompt import Prompt
 
 class validService:
     def __init__(self):
@@ -13,12 +13,13 @@ class validService:
 
         
     def sign_Up(self, Username, Password, Email):
+        console = Console()
         while not self.is_valid_email(Email):
-            Email = input('Please enter a valid email: ')
+            Email = Prompt.ask('Please enter a valid email: ')
         try:
             user = self.user_manager.add_user(Username, Password, Email)
             if user:
-                print(f'You signed up successfully {Username}!')
+                console.print(f'\nYou signed up successfully {Username}!', style='bold deep_sky_blue1')
                 time.sleep(1.5)
                 return user
         except ValueError as error:
@@ -27,34 +28,53 @@ class validService:
     
     
     def log_in(self, Username, Password):
+        console = Console()
         user = self.user_manager.load_user(Username, Password)
         try:
             if user:
                 if user.is_Manager and user.activate:
-                    print(f'Welcome back {Username}! \nYou logged in as manager.')
+                    console.print(f'\nWelcome back {Username}! \nYou logged in as manager.', style='bold deep_sky_blue1')
                     time.sleep(3.5)
                     return user            
-                elif user.activate :
-                    print(f'Welcome back {Username}!')
+                elif user.activate:
+                    console.print(f'\nWelcome back {Username}!', style='bold deep_sky_blue1')
                     time.sleep(2)
                     return user
                 elif not user.activate:
-                    print(f'{Username} is inactivate.')
+                    console.print(f'\n{Username} is inactivated.', style='dark_orange')
                     time.sleep(2)
             else:
-                print('Invalid username or password.')
+                console.print('\nInvalid username or password.', style='dark_orange')
                 time.sleep(2)
         except Exception as error:
-            print(f'An unexpected error occured: {error}')
+            console.print(f'\nAn unexpected error occured: {error}', style='dark_orange')
     
     
     def deactivate_user(self, Username, Password):
+        console = Console()
         user = self.user_manager.load_user(Username, Password)
-        if user:
-            user.active = False
-            self.user_manager.save_users(user)
-            print(f'{Username} has been successfully deactivated.')
+        print(user.activate)
+        if user.activate:
+            user.activate = False
+            self.user_manager.save_user(user)
+            console.print(f'\n{Username} has been successfully deactivated.', style='bold deep_sky_blue1')
+            time.sleep(2)
             return user
         else:
-            print('User not found.')
+            console.print(f'\n{Username} is already inactivated.', style='dark_orange')
+            time.sleep(2)
+            return None
+    
+    def activate_user(self, Username, Password):
+        console = Console()
+        user = self.user_manager.load_user(Username, Password)
+        if not user.activate:
+            user.activate = True
+            self.user_manager.save_user(user)
+            console.print(f'\n{Username} has been successfully activated.', style='bold deep_sky_blue1')
+            time.sleep(2)
+            return user
+        else:
+            console.print('\n{Username} is already activated.', style='dark_orange')
+            time.sleep(2)
             return None
