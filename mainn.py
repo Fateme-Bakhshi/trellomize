@@ -1,46 +1,49 @@
 from Users.validation import validService
-import os
+import os, time, sys #for show_slowly func
 from rich.markdown import Markdown
 from rich.console import Console
 from rich.prompt import Prompt
 from rich import print
 from rich.panel import Panel
-import time
-import sys
+
 
 class main:
     def __init__(self):
         self.valid_service = validService()
         self.user = {}
+    
+    def clear_screen(self):
+        os.system('cls')
         
-    def show_slowly(self, text, delay=0.1):
+    def print_slowly(self, text, delay=0.1):
         for char in text:
             sys.stdout.write(char)
             sys.stdout.flush() 
             time.sleep(delay)
+        time.sleep(1.5)
     
-    def title(self, con, text):
-        os.system('cls')
-        print("\n")
-        con.rule(text, style="bold white")
+    def show_title(self, title):
+        self.clear_screen()
+        console = Console()
+        print('\n')
+        console.rule(title, style="bold white")
+        time.sleep(1)
+    
+    def display_choices(self, choices, width):
+        console = Console()
+        for option, title in enumerate(choices):
+            console.print(Panel(title,title=str(option+1),title_align="center", width=width, border_style="bold deep_sky_blue1"), justify="center")
+            time.sleep(0.2)
             
     def log_or_sign(self):
-        os.system('cls')
-        con = Console()
+        self.clear_screen()
         
-        self.show_slowly("\nWelcome to Project Management System!", 0.04)
-        time.sleep(2)
+        self.print_slowly("\nWelcome to Project Management System!", 0.04)
         
         while True:
-            self.title(con, "[bold deep_sky_blue3]Login/Sign Up")
+            self.show_title("[bold deep_sky_blue3]Login/Sign Up")
             print("\n")
-            con.print(Panel("Login",title="1",title_align="center", width=12, border_style="bold deep_sky_blue1"), justify="center")
-            time.sleep(0.2)
-            con.print(Panel("Sign Up",title="2",title_align="center", width=12, border_style="bold deep_sky_blue1"), justify="center")
-            time.sleep(0.2)
-            con.print(Panel("Exit",title="3",title_align="center", width=12, border_style="bold deep_sky_blue1"), justify="center")
-            time.sleep(0.2)
-            
+            self.display_choices(['Login', 'Sign Up', 'Exit'], 12)
             choice = input("                                                          Enter your choice: ")
             
             while True:
@@ -51,8 +54,8 @@ class main:
                     self.sign_up()
                     break
                 elif(choice == '3'):
-                    os.system('cls')
-                    self.show_slowly("\nThanks for using this program!", 0.04)
+                    self.clear_screen()
+                    self.print_slowly("\nThanks for using this program!", 0.04)
                     time.sleep(0.5)
                     exit(1)
                 else:
@@ -60,45 +63,72 @@ class main:
         
     def login(self):
         con = Console()
-        self.title(con, "[bold deep_sky_blue3]Login")
-        time.sleep(1)
+        self.show_title("[bold deep_sky_blue3]Login")
         
         username = Prompt.ask("Enter your Username")
-        password = Prompt.ask("Enter your Password")
+        password = Prompt.ask("Enter your Password", password=True)
         self.user = self.valid_service.log_in(username, password)
         if self.user:
             self.user_dashboard()
         
     def sign_up(self):
         con = Console()
-        self.title(con, "[bold deep_sky_blue3]Sign Up")
-        time.sleep(1)
+        self.show_title("[bold deep_sky_blue3]Sign Up")
         
         username = Prompt.ask("Enter the Username")
-        password = Prompt.ask("Enter the Password")
+        password = Prompt.ask("Enter the Password", password=True)
         email = Prompt.ask("Enter the Password", default="example@gmail.com")
         
         self.valid_service.sign_Up(username, password, email)
     
     def user_dashboard(self):
-        con = Console()
-        self.title(con, "[bold deep_sky_blue3]User Dashboard")
-        print("\n")
-        time.sleep(1)
+        while True:
+            self.show_title("[bold deep_sky_blue3]User Dashboard")
+            print("\n")
         
-        con.print(Panel("Pre-made projects",title="1",title_align="center", width=20, border_style="bold deep_sky_blue1"), justify="center")
-        time.sleep(0.2)
-        con.print(Panel("Making a new project",title="2",title_align="center", width=20, border_style="bold deep_sky_blue1"), justify="center")
-        time.sleep(0.2)
-        if self.user.is_Manager:
-            con.print(Panel("Deactivating an account",title="3",title_align="center", width=20, border_style="bold deep_sky_blue1"), justify="center")
-            time.sleep(0.2)
-            con.print(Panel("Activating an account ",title="4",title_align="center", width=20, border_style="bold deep_sky_blue1"), justify="center")
-            time.sleep(0.2)
+            choices = ['Pre-made projects', 'Making a new project']
+            if not self.user.is_Manager:
+                choices.extend(['Back', 'Exit'])
+                self.display_choices(choices, 20)
+            else:
+                choices.extend(['Deactivating an account', 'Activating an account', 'Back', 'Exit'])
+                self.display_choices(choices, 20)
             
-        input = ('Enter your choice: ')
-        exit(1)
 
+            choice2 = input('                                                         Enter your choice: ')
+            while True:
+                if (choice2 == '3' and not self.user.is_Manager):
+                    return
+                if (choice2 == '4' and not self.user.is_Manager):
+                    exit(1)
+                if (choice2 == '3' and self.user.is_Manager):
+                    self.deactivating_user()
+                    break
+                if (choice2 == '4' and self.user.is_Manager):
+                    self.activating_user()
+                    break
+                if (choice2 == '5' and self.user.is_Manager):
+                    return
+                if (choice2 == '6' and self.user.is_Manager):
+                    exit(1)
+                else:
+                    choice2 = input('                                                          Please enter a valid number: ')
+                
+    def deactivating_user(self):
+        self.show_title("[bold deep_sky_blue3]Deactivating User")
+        
+        username = Prompt.ask('Enter the userename you want to deactivate')
+        password = Prompt.ask('Enter the password of the account', password=True)
+        self.valid_service.deactivate_user(username, password)
+
+    def activating_user(self):
+        self.show_title("[bold deep_sky_blue3]Activating User")
+        
+        username = Prompt.ask('Enter the userename you want to activate')
+        password = Prompt.ask('Enter the password of the account', password=True)
+        self.valid_service.activate_user(username, password)
+        
+        
 if __name__ == "__main__":
     m = main()
     m.log_or_sign()
