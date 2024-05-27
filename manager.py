@@ -19,7 +19,7 @@ def create_admin(Username, Password):
     if find_manager(Username):
         print('Admin already exists.')
     elif os.path.exists(manager_file):
-        save_manager(Username, Password)
+        update_manager(Username, Password)
         print('Admin updated successfully.')
     else:
         save_manager(Username, Password)
@@ -35,7 +35,7 @@ def find_manager(Username):
                     return True
                 return False
     except Exception as error:
-            print(f'There is an error: {error}')
+            print(f'There is an error: {str(error)}')
             return False
     
 def save_manager(Username, Password):
@@ -50,11 +50,28 @@ def save_manager(Username, Password):
     except Exception as error:
             print(f'There is an error: {error}')
 
+def update_manager(Username, Password):
+    """
+    Updates the current manager,
+    deletes the previous manager saved as 'user',
+    and saves the new manager.
+    
+    Parameters
+    ----------
+    Username, Password : str
+        the manager's username and password
+    """
+    with open(manager_file, 'r') as input: 
+        manager = json.load(input)
+        manager_username = manager['Username'] 
+    manager_as_user = Path(f'Data\\Users/{manager_username}.json')
+    os.unlink(manager_as_user)
+    
+    save_manager(Username, Password)
+    
+
 def purge_data():
     confirmation = input('Are you sure you want to purge all data? (yes/no):')
-    #with open(manager_file, 'r') as name:
-    #    manager = json.load(name)
-    #    manager_username = manager['Username']
         
     while True:
         try:
@@ -62,13 +79,13 @@ def purge_data():
                 for data_path in [users_file #, project_file, #task_file 
                             ]:
                     for filename in os.listdir(data_path): #Get a list of all the files in the desired folder
-                        #if filename != manager_username:
-                            file_path = os.path.join(data_path, filename)
-                            os.unlink(file_path) #deleting the data
+                        file_path = os.path.join(data_path, filename)
+                        os.unlink(file_path) #deleting the data
                         
+                    os.unlink(manager_file)#deleting the manager information
                     usernames = open('Data/Usernames.json', 'r+')
                     usernames.seek(0)
-                    usernames.truncate() #deleting usernames
+                    usernames.truncate() #deleting usernames in usernames' file
                     
                     print('All data purged.')
             elif confirmation.lower() == 'no':
