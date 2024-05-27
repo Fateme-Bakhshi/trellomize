@@ -56,35 +56,33 @@ class UserManager:
         return False
     
     def add_user(self, username, password, email):
-        console = Console()
         if self.find_user(username):
-            console.print('\nUsername already exists.', style='dark_orange')
-            time.sleep(2)
+            raise ValueError('Username already exists.')
         else:
             self.user = User(username, password, email)
             self.save_user(self.user)
             return self.user
     
     def load_user(self, username, password):
-        console = Console()
         try:
             the_user_data = self.data_file / f'{username}.json'
-            with open(the_user_data, 'r') as input:
-                data = json.load(input)
+            if os.path.exists(the_user_data):
+                with open(the_user_data, 'r') as input:
+                    data = json.load(input)
+                
+                the_username = data['Username']
+                the_password = data['Password']
+                email = data['Email']
+                activate = data['Active']
+                is_Manager = data['Manager']
+                user = User(the_username, the_password, email, is_Manager, activate)
+                
+                if self.is_it_theUser(username, password):
+                    return user
+        except FileNotFoundError:
+            raise ValueError(f'User data file not found for: {username}')
             
-            the_username = data['Username']
-            the_password = data['Password']
-            email = data['Email']
-            activate = data['Active']
-            is_Manager = data['Manager']
-            user = User(the_username, the_password, email, is_Manager, activate)
-            
-            if self.is_it_theUser(username, password):
-                return user
-            else:
-                return None
-        except Exception as error:
-            console.print(f'There is an error: {error}', style='dark_orange')
+        return None
 
         
     def save_user(self, user):
@@ -95,7 +93,7 @@ class UserManager:
             
             with open(the_user_data, 'w') as output: #Saving the user
                 json.dump(user_to_save, output)
-            
+                
             usernames = []
             if os.path.getsize(usernames_data) > 0:
                 with open(usernames_data, 'r') as names: #Reading the usernames
@@ -105,9 +103,8 @@ class UserManager:
             
             with open(usernames_data, 'w') as name: #Saving updated usernames
                 json.dump(usernames, name)
-                
-        except Exception as error:
-            print(f'An error occured: {error}')
+        except ValueError:
+            raise('Could not open files.')
             
             
     def is_it_theUser(self, username, password):
