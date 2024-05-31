@@ -11,7 +11,7 @@ class validService:
         regex = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w+$'
         return re.match(regex, email)
 
-    def are_valid_fields(self, Username, Password, Email):
+    def are_valid_fields(self, Username, Password, Email=" "):
         if Username == "" or Password == "" or Email == "":
             raise ValueError('Please fill all fields.')
         elif len(Username) < 6: 
@@ -20,6 +20,7 @@ class validService:
             raise ValueError('Username must not contain spaces.')      
         elif len(Password) < 8:
             raise ValueError('Password must be atleast 8 characters.')
+        return True
             
     def sign_Up(self, Username, Password, Email):
         console = Console()
