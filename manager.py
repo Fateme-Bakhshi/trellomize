@@ -1,19 +1,17 @@
 import argparse #terminal management
-import json , os, hashlib
+import json , os, logging
 from pathlib import Path
 from Users.user import User
 from Users.user import UserManager
 
+logging.basicConfig(filename="logFile/actions.log", format='%(asctime)s - %(message)s', filemode='a', level=logging.DEBUG)
 
-
+usernames_file = Path('Data/Usernames.json')
 manager_file = Path('Data\\Manager.json')
 users_file = Path('Data\\Users')
 #project file
 #task file
-
-def hash_password(password):         
-    hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
-    return hashed_password
+logfile = Path('logFile/actions.log')
 
 def create_admin(Username, Password):
     if find_manager(Username):
@@ -21,9 +19,11 @@ def create_admin(Username, Password):
     elif os.path.exists(manager_file):
         update_manager(Username, Password)
         print('Admin updated successfully.')
+        logging.info(f'Manager updated to "{Username}".')
     else:
         save_manager(Username, Password)
         print('Admin created successfully.')
+        logging.info(f'"{Username}" was created as a Manager.')
 
 
 def find_manager(Username):
@@ -33,7 +33,7 @@ def find_manager(Username):
                 manager = json.load(input)
                 if manager['Username'] == Username:
                     return True
-                return False
+        return False
     except Exception as error:
             print(f'There is an error: {str(error)}')
             return False
@@ -53,7 +53,7 @@ def save_manager(Username, Password):
 def update_manager(Username, Password):
     """
     Updates the current manager,
-    deletes the previous manager saved as 'user',
+    deletes the previous manager saved as 'user' and it's username,
     and saves the new manager.
     
     Parameters
@@ -67,12 +67,19 @@ def update_manager(Username, Password):
     manager_as_user = Path(f'Data\\Users/{manager_username}.json')
     os.unlink(manager_as_user)
     
+    usernames = []
+    if os.path.exists(usernames_file):
+        with open(usernames_file, 'r') as names: #Reading the usernames
+            usernames = json.load(names)
+        usernames.remove(manager_username)
+    with open(usernames_file, 'w') as name: #Saving updated usernames
+        json.dump(usernames, name)
+        
     save_manager(Username, Password)
     
 
 def purge_data():
     confirmation = input('Are you sure you want to purge all data? (yes/no):')
-        
     while True:
         try:
             if confirmation.lower() == 'yes':
@@ -81,20 +88,24 @@ def purge_data():
                     for filename in os.listdir(data_path): #Get a list of all the files in the desired folder
                         file_path = os.path.join(data_path, filename)
                         os.unlink(file_path) #deleting the data
-                        
-                    os.unlink(manager_file)#deleting the manager information
-                    usernames = open('Data/Usernames.json', 'r+')
-                    usernames.seek(0)
-                    usernames.truncate() #deleting usernames in usernames' file
-                    
-                    print('All data purged.')
+                if usernames_file.exists():
+                    os.remove(usernames_file)
+                if manager_file.exists():
+                    os.remove(manager_file)
+                if logfile.exists():
+                    logging.shutdown()
+                    os.remove(logfile)
+                print('All data purged.')
+                break
             elif confirmation.lower() == 'no':
                 print('Operation cancelled.')
+                break
             else:
-                print('Please enter a valid answer.')
+                confirmation = input('Please enter a valid answer.')
+                
         except Exception as error:
             print(f'An uexpected error occured: {error}')
-        break
+            break
         
         
 if __name__ == '__main__':
