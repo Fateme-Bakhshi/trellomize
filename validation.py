@@ -33,13 +33,11 @@ class validService:
                 console.print(f'You signed up successfully {Username}!', style='bold deep_sky_blue1')
                 time.sleep(2.5)
                 return user
+            
         except ValueError as error:
             console.print(f'An error occured: {str(error)}', style='dark_orange')
             time.sleep(2.5)
             return None
-        except Exception as error:
-            console.print(f'An unexpected error occurred: {str(error)}', style='dark_orange')
-            time.sleep(2.5)
     
     
     def log_in(self, Username, Password):
@@ -57,9 +55,9 @@ class validService:
                     return user
                 elif not user.activate:
                     raise ValueError(f'{Username} is inactivated.')
-            else:
-                raise ValueError('Invalid username or password.')
-                
+
+        except FileNotFoundError as error:
+            console.print(error, style='dark_orange')
         except ValueError as error:
             console.print(f'An error occured: {str(error)}', style='dark_orange')
             time.sleep(2.5)
@@ -83,8 +81,12 @@ class validService:
                     console.print(f'{Username} is already inactivated.', style='dark_orange')
                     time.sleep(2.5)
                     return None
+                
         except ValueError as error:
             console.print(f'An error occured: {str(error)}', style='dark_orange')
+            time.sleep(3.5)
+        except FileNotFoundError as error:
+            console.print(error, style='dark_orange')
             time.sleep(3.5)
             
     
@@ -105,4 +107,7 @@ class validService:
                     return None
         except ValueError as error:
             console.print(f'An error occured: {str(error)}', style='dark_orange')
+            time.sleep(3.5)
+        except FileNotFoundError as error:
+            console.print(error, style='dark_orange')
             time.sleep(3.5)
