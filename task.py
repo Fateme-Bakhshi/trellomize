@@ -1,16 +1,23 @@
-import json #for save file
+
+import json, uuid #for save file #for unic id
 from pathlib import Path  #for save file
-import uuid # for unic id
 from datetime import datetime,timedelta #for time
 from enum import Enum #for Enum Class
 from rich.console import Console #for table
 from rich.table import Table
-from project import ProjectError
-from project import PremissionError
+from .project import ProjectError
+from .project import PremissionError
+import os, logging
+from Users.user import UserManager
 
+idsData = Path('Projects_Data/projectIds.json')
+AllprojectFile = Path('Projects_Data/project.json')
 
+logging.basicConfig(filename="logFile/actions.log", format='%(asctime)s - %(message)s', filemode='a', level=logging.DEBUG)
 
-
+def clear_screen():
+    os.system('cls')
+    
 class Priority(Enum):
     CRITICAL = 'CRITICAL'
     HIGH = 'HIGH'
@@ -84,7 +91,7 @@ class TaskManager(Task):
         """
         try:
             task = TaskManager()
-            answer1 = input("Do you want to writ title for task? y/n  ")
+            answer1 = input("Do you want to write title for task? y/n  ")
             while True:
                 if answer1 == 'y':
                     title = input("Enter title: ")
@@ -95,7 +102,7 @@ class TaskManager(Task):
                 elif answer1 != 'n':
                     print("Invalid answer.Pleas try again.")
                     answer1 = input()
-            answer2 = input("Do you want to writ description? y/n  ")
+            answer2 = input("Do you want to write description? y/n  ")
             while True:
                 if answer2 == 'y':
                     description = input("Enter description: ")
@@ -104,10 +111,9 @@ class TaskManager(Task):
                 elif answer2 == 'n':
                     break
                 elif answer2 != 'n':
-                    print("Invalid answer.Pleas try again.")
+                    print("Invalid answer.Please try again.")
                     answer2 = input()
-            AllprojectFile = Path('data') / f'project.json'
-            datafile = Path('data') / f'project_{projectId}.json'
+            datafile = Path('Projects_Data') / f'project_{projectId}.json'
             with open(AllprojectFile , 'r') as f:
                 AllProjects = json.load(f)
             task.ToDictTask()
@@ -124,7 +130,9 @@ class TaskManager(Task):
                             json.dump(project , f , indent=4)
                         with open(AllprojectFile , 'w') as f:
                             json.dump(AllProjects , f , indent=4)
-                        print(f"Task {AllProjects[i]["tasks"][int(position) - 1]["title"]} created successfully with Id {AllProjects[i]["tasks"][int(position) - 1]["id"]} .")
+                        print(f'Task {AllProjects[i]["tasks"][int(position) - 1]["title"]} created successfully with Id {AllProjects[i]["tasks"][int(position) - 1]["id"]}.')
+                        logging.info(f'Task {AllProjects[i]["tasks"][int(position) - 1]["title"]} created successfully with Id {AllProjects[i]["tasks"][int(position) - 1]["id"]}.')
+                        break
         except Exception as e:
             print(f"Error creating task: {e}")
 
@@ -142,9 +150,7 @@ class TaskManager(Task):
             PremissionError: _description_
         """
         try:
-            idsData = Path('data/projectIds.json')
-            AllprojectFile = Path('data') / f'project.json'
-            datafile = Path('data') / f'project_{projectId}.json'
+            datafile = Path('Data') / f'project_{projectId}.json'
             with open(datafile,'r') as f:
                 project = json.load(f)
             with open(AllprojectFile , 'r') as f:
@@ -161,7 +167,7 @@ class TaskManager(Task):
                                 if username not in AllProjects[position]["tasks"][j]["assignees"]:
                                     AllProjects[position]["tasks"][j]["assignees"].append(username)
                                     time = str(datetime.now())
-                                    action = f"{username} add to the task {AllProjects[position]["tasks"][j]["title"]}"
+                                    action = f'{username} add to the task {AllProjects[position]["tasks"][j]["title"]}.'
                                     historyDict = self.ToDictHistory(requester , time , action)
                                     AllProjects[position]["tasks"][j]["history"].append(historyDict)
                                     project["tasks"][j]["assignees"].append(username)
@@ -170,9 +176,10 @@ class TaskManager(Task):
                                         json.dump(AllProjects , f ,indent=4)
                                     with open(datafile , 'w') as f:
                                         json.dump(project , f , indent=4)
-                                    print(f"User {username} added to '{AllProjects[position]["tasks"][j]["title"]}'.")
+                                    print(f'User {username} added to "{AllProjects[position]["tasks"][j]["title"]}".')
+                                    logging.info(f'User {username} added to "{AllProjects[position]["tasks"][j]["title"]}".')
                                 else:
-                                    print(f"User {username} is already a member of the task '{AllProjects[position]["tasks"][j]["title"]}'.")
+                                    print(f'User {username} is already a member of the task "{AllProjects[position]["tasks"][j]["title"]}".')
             else:
                 raise PremissionError()
         except ProjectError as e:
@@ -191,9 +198,7 @@ class TaskManager(Task):
             PremissionError: _description_
         """
         try:
-            idsData = Path('data/projectIds.json')
-            AllprojectFile = Path('data') / f'project.json'
-            datafile = Path('data') / f'project_{projectId}.json'
+            datafile = Path('Data') / f'project_{projectId}.json'
             with open(datafile , 'r') as f:
                 project = json.load(f)
             with open(AllprojectFile , 'r') as f:
@@ -211,7 +216,7 @@ class TaskManager(Task):
                                     for i in range(len(AllProjects[position]["tasks"][j]["assignees"])):
                                         if username == AllProjects[position]["tasks"][j]["assignees"][i]:
                                             time = str(datetime.now())
-                                            action = f"{username} remove from the task {AllProjects[position]["tasks"][j]["title"]}"
+                                            action = f'{username} remove from the task {AllProjects[position]["tasks"][j]["title"]}'
                                             historyDict = self.ToDictHistory(requester , time , action)
                                             AllProjects[position]["tasks"][j]["assignees"].pop(i)
                                             project['tasks'][j]['assignees'].pop(i)
@@ -221,9 +226,10 @@ class TaskManager(Task):
                                                 json.dump(AllProjects , f ,indent=4)
                                             with open(datafile , 'w') as f:
                                                 json.dump(project , f , indent=4)
-                                            print(f"User {username} removed from '{AllProjects[position]["tasks"][j]["title"]}'.")
+                                            print(f'User {username} removed from "{AllProjects[position]["tasks"][j]["title"]}"".')
+                                            logging.info(f'User {username} removed from "{AllProjects[position]["tasks"][j]["title"]}".')
                                         else:
-                                            print(f"User {username} is not a member of the task '{AllProjects[position]["tasks"][j]["title"]}'.")
+                                            print(f'User {username} is not a member of the task "{AllProjects[position]["tasks"][j]["title"]}"".')
             else:
                 raise PremissionError()
         except ProjectError as e:
@@ -239,8 +245,7 @@ class TaskManager(Task):
         """
         try:
             description = input("Enter your comment:")
-            AllprojectFile = Path('data') / f'project.json'
-            datafile = Path('data') / f'project_{projectId}.json'
+            datafile = Path('Data') / f'project_{projectId}.json'
             with open(AllprojectFile , 'r') as f:
                 AllProjects = json.load(f)
             with open(datafile , 'r') as f:
@@ -259,21 +264,20 @@ class TaskManager(Task):
                             with open(datafile , 'w') as f:
                                 json.dump(project , f , indent=4)
                             print(f"You successfully commented.")
+                            logging.info(f"{user} commented on {AllProjects[i]['tasks'][j]['title']} task.")
         except Exception as e:
             print(f"Error commenting task: {e}")
 
 
     def UpdateTask(self , projectId , TaskId , username):
         """update and change task
-
         Args:
             projectId (_type_): _id of project_
             TaskId (_type_): _id of task_
             username (_type_): _username_
         """
         try:
-            AllprojectFile = Path('data') / f'project.json'
-            datafile = Path('data') / f'project_{projectId}.json'
+            datafile = Path('Data') / f'project_{projectId}.json'
             with open(AllprojectFile , 'r') as f:
                 AllProjects = json.load(f)
             with open(datafile , 'r') as f:
@@ -310,6 +314,7 @@ class TaskManager(Task):
                                                     with open(datafile , 'w') as f:
                                                         json.dump(project , f , indent=4)
                                                     print("Title changed successfully")
+                                                    logging.info(f'task {AllProjects[i]["tasks"][j]["title"]} changed to {newTitle}.')
                                                     return
                                                         
 
@@ -329,23 +334,30 @@ class TaskManager(Task):
                                                     with open(datafile , 'w') as f:
                                                         json.dump(project , f , indent=4)
                                                     print("description changed successfully")
+                                                    logging.info(f'task {AllProjects[i]["tasks"][j]["description"]} changed to {newDes}.')
                                                     return
                                                         
 
                                 elif choice == '3':
                                     if username == AllProjects[it]["leader"]:
+                                        user_manager = UserManager()
                                         user = input("Enter the ID of the person you want to remove or add:")
-                                        choice1 = input("Do you want to remove or add? r(for remove)/a(for add)")
-                                        while True:
-                                            if choice1 == 'r':
-                                                self.RemoveMemberTask(user , username , projectId , AllProjects[it]["tasks"][it1]["id"])
-                                                return
-                                            elif choice1 == 'a':
-                                                self.AddMemberToTask(user , username , projectId , AllProjects[it]["tasks"][it1]["id"])
-                                                return
-                                            else:
-                                                print("Invalid choice.Pleas try again.")
-                                                choice1 = input()
+                                        if not user_manager.find_user(user):
+                                            print('Username does not exist.')
+                                            return
+                                        else:
+                                            choice1 = input("Do you want to remove or add? r(for remove)/a(for add)")
+                                            while True:
+                                                if choice1 == 'r':
+                                                    self.RemoveMemberTask(user , username , projectId , AllProjects[it]["tasks"][it1]["id"])
+                                                    
+                                                    return
+                                                elif choice1 == 'a':
+                                                    self.AddMemberToTask(user , username , projectId , AllProjects[it]["tasks"][it1]["id"])
+                                                    return
+                                                else:
+                                                    print("Invalid choice.Please try again.")
+                                                    choice1 = input()
                                     else:
                                         print("Sorry.you are not leader.")
                                         break
@@ -384,6 +396,7 @@ class TaskManager(Task):
                                                         with open(datafile , 'w') as f:
                                                             json.dump(project , f , indent=4)
                                                         print("Priority changed successfully")
+                                                        logging.info(f'Priority changed from {project["tasks"][j]["priority"]} to {newPriority}.')
                                                         return
                                     except Exception as e:
                                         print(f"Error Changing Priority: {e}")
@@ -423,6 +436,7 @@ class TaskManager(Task):
                                                         with open(datafile , 'w') as f:
                                                             json.dump(project , f , indent=4)
                                                         print("Status changed successfully")
+                                                        logging.info(f'Status changed from {project["tasks"][j]["status"]} to {newStatus}.')
                                                         return
                                     except Exception as e:
                                         print(f"Error Changing Status: {e}")
@@ -452,26 +466,27 @@ class TaskManager(Task):
             username (_type_): _username_
             projectId (_type_): _id of project_
         """
+        clear_screen()
         try:
             print("\n")
-            print(f" ID: {task["id"]}")
-            print(f" Title: {task["title"]}")
-            print(f" Description: {task["description"]}")
-            print(f" Priority: {task["priority"]}")
-            print(f" Status: {task["status"]}")
-            print(f" Start Time: {task["startTime"]}")
-            print(f" End Time: {task["endTime"]}")
-            print(f" Assignees: {', '.join(task["assignees"])}")
+            print(f' ID: {task["id"]}')
+            print(f' Title: {task["title"]}')
+            print(f' Description: {task["description"]}')
+            print(f' Priority: {task["priority"]}')
+            print(f' Status: {task["status"]}')
+            print(f' Start Time: {task["startTime"]}')
+            print(f' End Time: {task["endTime"]}')
+            print(f' Assignees: {", ".join(task["assignees"])}')
             print(" History:")
             for i in range(len(task["history"])):
                 print(f"{int(i) + 1}.")
-                print(f"  User : {task["history"][i]["user"]}")
-                print(f"  Description : {task["history"][i]["action"]}")
+                print(f'  User : {task["history"][i]["user"]}')
+                print(f'  Description : {task["history"][i]["action"]}')
             print(" Comments:")
             for j in range(len(task["comments"])):
                 print(f"{int(j) + 1}.")
-                print(f"  User : {task["comments"][j]["user"]}")
-                print(f"  Description : {task["comments"][j]["description"]}")
+                print(f'  User : {task["comments"][j]["user"]}')
+                print(f'  Description : {task["comments"][j]["description"]}')
     
             answer = input("Do you want to edit this task? (y/n):")
             taskmanager = TaskManager()
@@ -497,6 +512,7 @@ def TableTask(tasks , username , projectID):
         username (_type_): _username_
         projectID (_type_): _id of project_
     """
+    clear_screen()
     try:
         taskManager = TaskManager()
         console = Console()
@@ -509,15 +525,15 @@ def TableTask(tasks , username , projectID):
         it1 = 0
         for it1 in range(len(tasks)):
             if tasks[it1]["status"] == 'BACKLOG':
-                ListBack.append(f"{tasks[it1]["title"]}-{tasks[it1]["id"]}")
+                ListBack.append(f'{tasks[it1]["title"]}-{tasks[it1]["id"]}')
             elif tasks[it1]["status"] == 'TODO':
-                ListTodo.append(f"{tasks[it1]["title"]}-{tasks[it1]["id"]}")
+                ListTodo.append(f'{tasks[it1]["title"]}-{tasks[it1]["id"]}')
             elif tasks[it1]["status"] == 'DOING':
-                ListDoing.append(f"{tasks[it1]["title"]}-{tasks[it1]["id"]}")
+                ListDoing.append(f'{tasks[it1]["title"]}-{tasks[it1]["id"]}')
             elif tasks[it1]["status"] == 'DONE':
-                ListDone.append(f"{tasks[it1]["title"]}-{tasks[it1]["id"]}")
+                ListDone.append(f'{tasks[it1]["title"]}-{tasks[it1]["id"]}')
             elif tasks[it1]["status"] == 'ARCHIVED':
-                ListArchived.append(f"{tasks[it1]["title"]}-{tasks[it1]["id"]}")
+                ListArchived.append(f'{tasks[it1]["title"]}-{tasks[it1]["id"]}')
         table.add_column("BACKLOG", justify="center", style="bold blue")
         table.add_column("TODO", justify="center", style="bold blue")
         table.add_column("DOING", justify="center", style="bold blue")
