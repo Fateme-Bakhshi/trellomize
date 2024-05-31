@@ -1,8 +1,8 @@
 import json #for save file
 from pathlib import Path  #for save file
-import os
+import os, logging
 
-
+logging.basicConfig(filename="logFile/actions.log", format='%(asctime)s - %(message)s', filemode='a', level=logging.DEBUG)
 
 class ProjectError(Exception):
     pass
@@ -20,6 +20,8 @@ class NotFoundError(ProjectError):
         super().__init__(f"{name} does not exist.")
 
 
+def clear_screen():
+    os.system('cls')
 
 class Project:
     def __init__(self , title , projectId , leader):
@@ -45,6 +47,8 @@ class Project:
 class ProjectManager(Project): 
     def __init__(self):
         super().__init__(title = '' , projectId = '' , leader = '')
+        self.data_folder = Path('Projects_Data')
+        self.data_folder.mkdir(parents=True, exist_ok=True)
 
 
     def findId(self, projectId):
@@ -55,7 +59,7 @@ class ProjectManager(Project):
         Returns:
             _type_: _description_
         """
-        idsData = Path('data/projectIds.json')
+        idsData = Path('Projects_Data/projectIds.json')
         if os.path.exists(idsData):
             if idsData.stat().st_size > 0:
                 with open(idsData, 'r') as inputFile:
@@ -101,14 +105,15 @@ class ProjectManager(Project):
             project (_type_): _dict or object_
         """
         try:
-            AllprojectFile = Path('data') / f'project.json'
-            datafile = Path('data') / f'project_{project["id"]}.json'
-            idData = Path('data/projectIds.json')
+            AllprojectFile = self.data_folder / 'project.json'
+            datafile = self.data_folder / f"project_{project['id']}.json"
+            idData = Path('Projects_Data/projectIds.json')
             if not isinstance(project , dict):
                 project = project.ToDict()
         
             with open(datafile,'w') as f:
-                json.dump(project, f, indent=4)   
+                json.dump(project, f)  
+                
             project_list = []
             if os.path.exists(AllprojectFile):
                 with open(AllprojectFile, 'r') as f:
@@ -129,13 +134,13 @@ class ProjectManager(Project):
 
 
         
-    def CreateProject(self):
+    def CreateProject(self, leader):
         """
             creat project
         """
         try:
             title = input("Enter project title: ")
-            leader = input("Enter your username: ")
+            leader = leader.username
             while True:
                 projectId = input("Enter project ID: ")
                 while not projectId.isdigit():
@@ -147,6 +152,7 @@ class ProjectManager(Project):
                     projectId = input("Enter project ID: ")
                     break
                 if(self.AddProject(title , projectId , leader)):
+                    logging.info(f'{leader} added a new project with {title} title and {projectId} id.')
                     break
         except Exception as e:
             print(f"Error creating project: {e}")
@@ -164,8 +170,8 @@ class ProjectManager(Project):
             _type_: _description_
         """
         try:
-            idsData = Path('data/projectIds.json')
-            AllprojectFile = Path('data') / f'project.json'
+            idsData = Path('Projects_Data/projectIds.json')
+            AllprojectFile = self.data_folder / f'project.json'
             with open(AllprojectFile , 'r') as f:
                 AllProjects = json.load(f)
             if idsData.stat().st_size > 0:
@@ -201,9 +207,9 @@ class ProjectManager(Project):
             PremissionError: _description_
         """
         try:
-            idsData = Path('data/projectIds.json')
-            AllprojectFile = Path('data') / f'project.json'
-            datafile = Path('data') / f'project_{projectId}.json'
+            idsData = Path('Projects_Data/projectIds.json')
+            AllprojectFile = self.data_folder / f'project.json'
+            datafile = self.data_folder / f'project_{projectId}.json'
             with open(AllprojectFile , 'r') as f:
                 AllProjects = json.load(f)
             if idsData.stat().st_size > 0:
@@ -243,9 +249,9 @@ class ProjectManager(Project):
             PremissionError: _description_
         """
         try:
-            idsData = Path('data/projectIds.json')
-            AllprojectFile = Path('data') / f'project.json'
-            datafile = Path('data') / f'project_{projectId}.json'
+            idsData = Path('Projects_Data/projectIds.json')
+            AllprojectFile = self.data_folder / f'project.json'
+            datafile = self.data_folder / f'project_{projectId}.json'
             with open(AllprojectFile , 'r') as f:
                 AllProjects = json.load(f)
             if idsData.stat().st_size > 0:
@@ -289,8 +295,9 @@ class ProjectManager(Project):
             PremissionError: _description_
         """
         try:
-            idsData = Path('data/projectIds.json')
-            AllprojectFile = Path('data') / f'project.json'
+            idsData = Path('Projects_Data/projectIds.json')
+            AllprojectFile = self.data_folder / f'project.json'
+            dataFile = self.data_folder/f'project_{projectId}.json'
             with open(AllprojectFile , 'r') as f:
                 AllProjects = json.load(f)
             if idsData.stat().st_size > 0:
@@ -303,10 +310,11 @@ class ProjectManager(Project):
                 if requester == AllProjects[position]["leader"]:
                     AllProjects.pop(position)
                     ids.pop(position)
-                    dataFile = Path('data')/f'project_{projectId}.json'
-                    AllprojectFile = Path('data') / f'project.json'
-                    idsData = Path('data/projectIds.json')
                     dataFile.unlink()
+                    with open(AllprojectFile , 'w') as f:
+                        json.dump(AllProjects , f ,indent=4)
+                    with open(idsData , 'w') as f:
+                        json.dump(ids , f , indent=4)
                     print(f"The project '{projectTitle}' deleted successfully.")
                 else:
                     raise PremissionError()
@@ -320,8 +328,9 @@ class ProjectManager(Project):
         Args:
             username (_type_): _username_
         """
+        clear_screen()
         try:
-            AllprojectFile = Path('data') / f'project.json'
+            AllprojectFile = self.data_folder / f'project.json'
             with open(AllprojectFile , 'r') as f:
                 AllProjects = json.load(f)
             it = 0
@@ -329,7 +338,7 @@ class ProjectManager(Project):
                 temp = 0
                 for it in range(len(AllProjects)):
                     if username == AllProjects[it]["leader"]:
-                        print(f"{AllProjects[it]["title"]} / ID : {AllProjects[it]["id"]}")
+                        print(f"{AllProjects[it]['title']} / ID : {AllProjects[it]['id']}")
                         temp += 1
                 if temp == 0:
                     print("You are not a leader of any project.")
@@ -346,8 +355,9 @@ class ProjectManager(Project):
         Args:
             username (_type_): _username_
         """
+        clear_screen()
         try:
-            AllprojectFile = Path('data') / f'project.json'
+            AllprojectFile = Path('Projects_Data') / f'project.json'
             with open(AllprojectFile , 'r') as f:
                 AllProjects = json.load(f)
             it = 0
@@ -357,7 +367,7 @@ class ProjectManager(Project):
                     temp = 0
                     for i in range(len(AllProjects[it]["members"])):
                         if username == AllProjects[it]["members"][i] and username != AllProjects[it]["leader"]:
-                            print(f"{AllProjects[it]["title"]} / ID : {AllProjects[it]["id"]}")
+                            print(f"{AllProjects[it]['title']} / ID : {AllProjects[it]['id']}")
                             temp += 1
                 if temp == 0:
                     print("You are not a member of any project.")
