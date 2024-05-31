@@ -1,10 +1,31 @@
-import sys #for exit
-from task import TaskManager
-from task import TableTask
-from project import ProjectManager
+from .task import TaskManager
+from .task import TableTask
+from .project import ProjectManager
 import json #for save file
 from pathlib import Path  #for save file
+import os, logging, time
+from rich.console import Console
+from Users.user import UserManager
 
+logging.basicConfig(filename="logFile/actions.log", format='%(asctime)s - %(message)s', filemode='a', level=logging.DEBUG)
+
+def clear_screen():
+    os.system('cls')
+
+def show_title(title):
+    clear_screen()
+    console = Console()
+    print('\n')
+    console.rule(title, style="bold white")
+    #time.sleep(1)
+    
+def back():
+    choice = input('[0]Back\n')
+    while True:
+        if choice == '0':
+            return True
+        else:
+            choice = input('Enter "0" to return: ')
 
 def DisplayAllProject(projectManager , projects , Isbool , username):
     """Show all proejcts
@@ -15,7 +36,9 @@ def DisplayAllProject(projectManager , projects , Isbool , username):
         Isbool (_type_): _bool_
         username (_type_): _username_
     """
+    clear_screen()
     try:
+        print("Project List:")
         if len(projects) == 0:
             print("There are no projects.")
             return
@@ -23,8 +46,8 @@ def DisplayAllProject(projectManager , projects , Isbool , username):
         it = 0
         for it in range(len(projects)):
             temp += 1
-            print(f"({int(it) + 1}.{projects[it]["title"]} / ID: {projects[it]["id"]})")
-        choice = input("Which one you choose? ")
+            print(f"({int(it) + 1}.{projects[it]['title']} / ID: {projects[it]['id']})")
+        choice = input("\nWhich one you choose? ")
         while True:
             if int(choice) > int(temp) and int(choice) <= 0:
                 print("Invalid choice.Pleas try again.")
@@ -53,6 +76,8 @@ def ProjectMenu(projectManager , project , username):
         username (_type_): _description_
     """
     while True:
+        time.sleep(5)
+        clear_screen()
         print("\n")
         print("[1] View members")##member in each project
         print("[2] View Tasks")##all of task in each project
@@ -66,7 +91,7 @@ def ProjectMenu(projectManager , project , username):
             print("[9] Back to main menu")
         else:
             print("[5] Back to main menu")
-        choice = input("Enter your choice: ")
+        choice = input("\nEnter your choice: ")
         if choice == '1':
             if len(project["members"]) == 0:
                 print("This project doesn't have any member")
@@ -74,7 +99,7 @@ def ProjectMenu(projectManager , project , username):
                 i = 0
                 print("Members:")
                 for i in range(len(project["members"])):
-                    print(f"{int(i + 1)}. {project["members"][i]}")
+                    print(f"{int(i + 1)}. {project['members'][i]}")
 
         elif choice == '2':
             if len(project["tasks"]) == 0:
@@ -84,30 +109,30 @@ def ProjectMenu(projectManager , project , username):
                 print("Tasks:")
                 for i in range(len(project["tasks"])):
                     print(f"{int(i + 1)}]")
-                    print(f" Title: {project["tasks"][i]["title"]}")
-                    print(f" ID: {project["tasks"][i]["id"]}")
-                    print(f" Description: {project["tasks"][i]["description"]}")
-                    print(f" Assignees: {','.join(project["tasks"][i]["assignees"])}")
-                    print(f" Start Time: {project["tasks"][i]["startTime"]}")
-                    print(f" End Time: {project["tasks"][i]["endTime"]}")
-                    print(f" Priority: {project["tasks"][i]["priority"]}")
-                    print(f" Status: {project["tasks"][i]["status"]}")
+                    print(f' Title: {project["tasks"][i]["title"]}')
+                    print(f' ID: {project["tasks"][i]["id"]}')
+                    print(f' Description: {project["tasks"][i]["description"]}')
+                    print(f' Assignees: {",".join(project["tasks"][i]["assignees"])}')
+                    print(f' Start Time: {project["tasks"][i]["startTime"]}')
+                    print(f' End Time: {project["tasks"][i]["endTime"]}')
+                    print(f' Priority: {project["tasks"][i]["priority"]}')
+                    print(f' Status: {project["tasks"][i]["status"]}')
                     print(" History:")
                     for it in range(len(project["tasks"][i]["history"])):
-                        print(f"{int(it) + 1}.")
-                        print(f"  User : {project["tasks"][i]["history"][it]["user"]}")
-                        print(f"  Description : {project["tasks"][i]["history"][it]["action"]}")
+                        print(f'{int(it) + 1}.')
+                        print(f'  User : {project["tasks"][i]["history"][it]["user"]}')
+                        print(f'  Description : {project["tasks"][i]["history"][it]["action"]}')
                     print(" Comments:")
                     for j in range(len(project["tasks"][i]["comments"])):
                         print(f"{int(j) + 1}.")
-                        print(f"  User : {project["tasks"][i]["comments"][j]["user"]}")
-                        print(f"  Description : {project["tasks"][i]["comments"][j]["description"]}")
+                        print(f'  User : {project["tasks"][i]["comments"][j]["user"]}')
+                        print(f'  Description : {project["tasks"][i]["comments"][j]["description"]}')
         elif choice == '3':
-            print(f"Leader: {project["leader"]}")
+            print(f'Leader: {project["leader"]}')
 
         elif choice == '4':
             if len(project["tasks"]) == 0:
-                print("There is no task yet")
+                print("There are no tasks yet.")
             else:
                 member = input("Enter username of member: ")
                 i = 0
@@ -115,23 +140,29 @@ def ProjectMenu(projectManager , project , username):
                 for i in range(len(project["tasks"])):
                     if member in project["tasks"][i]["assignees"]:
                         temp += 1
-                        print(f"{member} assigned to this task {project["tasks"][i]["title"]}")
+                        print(f'{member} assigned to this task {project["tasks"][i]["title"]}')
                 if temp == 0:
-                    print(f"{username} is assigned to no tasks")
+                    print(f'{username} is assigned to no tasks')
 
         elif username != project["leader"] and choice == '5':
             return
 
         elif choice == '5' and username == project["leader"]:
+            clear_screen()
+            user_manager = UserManager()
             Adduser = input("Enter the ID you want to add: ")
-            projectManager.AddMember(project["id"] , project["title"] , Adduser , username)
+            if not user_manager.find_user(Adduser):
+                print('Username does not exist.')
+            else:
+                projectManager.AddMember(project["id"] , project["title"] , Adduser , username)
         
         elif choice == '6' and username == project["leader"]:
+            clear_screen()
             removeuser = input("Enter the ID you want to remove: ")
             projectManager.RemoveMember(project["id"] , project["title"] , removeuser , username)
 
         elif choice == '7' and username == project["leader"]:
-            project.DeletProject(project["id"] , project["title"] , username)
+            projectManager.DeletProject(project["id"] , project["title"] , username)
 
         elif choice == '8' and username == project["leader"]:
             taskManager = TaskManager()
@@ -142,52 +173,43 @@ def ProjectMenu(projectManager , project , username):
         else:
             print("Invalid choice.Please try again.")
 
-def Menu():
-    """Menu for projects
 
-    Returns:
-        _type_: _description_
-    """
-    print("[1] Creat a new project")
-    print("[2] Projects that you a member of.")
-    print("[3] Projects that you a leader of.")
-    print("[4] View all projects and change tasks.")
-    print("[5] View all projects and change the project.")
-    print("[6] Exit")
-    choice = input("Enter your choice: ")
-    return choice  
-
-def main():
-    username = input("Enter your username:")
+def Main(choice, username):
+    projectManager = ProjectManager()
+    AllprojectFile = Path('Projects_Data/project.json')
+    print("\n")
     while True:
-        projectManager = ProjectManager()
-        idsData = Path('data/projectIds.json')
-        AllprojectFile = Path('data') / f'project.json'
-        print("\n")
-        choice = Menu()
         if choice == '1':
-            print("Creating a new project....")
-            projectManager.CreateProject()
-
-        elif choice == '2':
+            show_title('Member Projects')
             projectManager.MemeberProject(username)
-
-        elif choice == '3':
+            if back():
+                break
+        
+        elif choice == '2':
+            show_title('Leader Projects')
             projectManager.LeaderProjects(username)
-
-        elif choice == '4':
-            print("Project List:")
+            if back():
+                break
+        
+        elif choice == '3':
+            clear_screen()
+            show_title('Managing Tasks')
             with open(AllprojectFile , 'r') as f:
                 AllProjects = json.load(f)
             DisplayAllProject(projectManager , AllProjects , False , username)
+            if back():
+                break
 
-        elif choice == '5':
+        elif choice == '4':
+            show_title('Managing Projects')
             with open(AllprojectFile , 'r') as f:
                 AllProjects = json.load(f)
             DisplayAllProject(projectManager , AllProjects , True , username)
-
+            if back():
+                break
+        elif choice == '5':
+            break
         elif choice == '6':
-            print("Exiting...")
-            sys.exit()
+            exit(1)
         else:
-            print("Invalid choice.Please try again.")
+            choice = input("Please enter a valid number: ")
