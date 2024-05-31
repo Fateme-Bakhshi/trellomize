@@ -1,5 +1,8 @@
-import json 
-from pathlib import Path  
+import json #for save file
+from pathlib import Path  #for save file
+import os
+
+
 
 class ProjectError(Exception):
     pass
@@ -36,54 +39,100 @@ class Project:
             'members' : self.members
         }
     
-    @staticmethod
-    def FromDict(data):
-        return Project(data['title'] , data['id'] , data['leader'])
       
         
 
-class ProjectManager(Project): #creat , find , load , add projects.be tore koli baraye modiriate projects
+class ProjectManager(Project): 
     def __init__(self):
         super().__init__(title = '' , projectId = '' , leader = '')
-        self.projects = []
+
+
+    def findId(self, projectId):
+        """
+        Args:
+            projectId (_type_): _id of project_
+
+        Returns:
+            _type_: _description_
+        """
+        idsData = Path('data/projectIds.json')
+        if os.path.exists(idsData):
+            if idsData.stat().st_size > 0:
+                with open(idsData, 'r') as inputFile:
+                    ids = json.load(inputFile)
+                    for id in ids:
+                        if projectId == id:
+                            return False
+        return True
+
 
     def AddProject(self , title , projectId , leader):
-        projectInfo = {
-            'title': title,
-            'id': projectId,
-            'leader' : leader,
-            'tasks' : [],
-            'memnbers' : []
-        }
-        self.projects.append(projectInfo)
-    def LoadProjects(self , projectId):
+        """
+        Args:
+            title (_type_): _title of project_
+            projectId (_type_): _id of project_
+            leader (_type_): _someone who creat project_
+
+        Raises:
+            ValueError: _Error of value_
+
+        Returns:
+            _type_: _description_
+        """
         try:
-            datafile = Path('data') / f'project_{projectId}.json'
-            with open(datafile,'r')as f:
-                projectData = json.load(f)
-                return [Project.FromDict(project) for project in projectData]
-        except(FileNotFoundError,json.JSONDecodeError) as e:
-            print(f"Error loading project: {e}")
-            return [] 
+            if self.findId(projectId):
+                project = Project(title , projectId , leader)
+                project = project.ToDict()
+                project["leader"] = leader
+                project["members"].append(leader)
+                self.SaveProject(project)
+                print(f"Project '{title}' created successfully with Id {projectId} .")
+                return True
+            else:
+                raise ValueError(projectId)
+        except Exception as e:
+            print(f"Error adding project: {e}")
+
         
-    def SaveProject(self , project , projectId):
+    def SaveProject(self , project):
+        """_save project to jsonFile_
+
+        Args:
+            project (_type_): _dict or object_
+        """
         try:
-            datafile = Path('data') / f'project_{projectId}.json'
-            with open(datafile,'a') as f:
-                json.dump([project.ToDict()], f, indent=4)   
+            AllprojectFile = Path('data') / f'project.json'
+            datafile = Path('data') / f'project_{project["id"]}.json'
+            idData = Path('data/projectIds.json')
+            if not isinstance(project , dict):
+                project = project.ToDict()
+        
+            with open(datafile,'w') as f:
+                json.dump(project, f, indent=4)   
+            project_list = []
+            if os.path.exists(AllprojectFile):
+                with open(AllprojectFile, 'r') as f:
+                    project_list = json.load(f)
+            project_list.append(project)
+            with open(AllprojectFile,'w') as f:
+                json.dump(project_list, f, indent=4)
+            ids = []
+            if os.path.exists(idData):
+                with open(idData, 'r') as idFile:
+                    ids = json.load(idFile)
+                    if not(project["id"] in ids):
+                        ids.append(project["id"])
+            with open(idData, 'w') as id: 
+                json.dump(ids , id)
         except IOError as e:
             print(f"Error saving project : {e}")     
-    
-    def IsUnicId(self , projectID):
-        if len(self.projects) == 0:
-                return True
-        else:
-            for project in self.projects:
-                if project.projectId == projectID:
-                    return False
-            return True
+
+
         
     def CreateProject(self):
+        """
+            creat project
+        """
         try:
             title = input("Enter project title: ")
             leader = input("Enter your username: ")
@@ -92,117 +141,225 @@ class ProjectManager(Project): #creat , find , load , add projects.be tore koli 
                 while not projectId.isdigit():
                     print("Sorry.You can just use number for ID.")
                     projectId = input("Enter project ID: ")
-                if self.IsUnicId(projectId):
-                    project = Project(title , projectId , leader)
-                    self.projects.append(project)
-                    self.SaveProject(project , projectId)
-                    print(f"Project '{title}' created successfully with Id {project.id} .")
                     break
-                else:
-                    raise ValueError(projectId)
+                while len(projectId) < 4:
+                    print("Your project ID must be atleast 4 digits")
+                    projectId = input("Enter project ID: ")
+                    break
+                if(self.AddProject(title , projectId , leader)):
+                    break
         except Exception as e:
             print(f"Error creating project: {e}")
 
 
-    def FindProject(self , projectId):
+   
+    def FindProject(self , projectId , username):
+        """
+
+        Args:
+            projectId (_type_): _id of project_
+            username (_type_): _user_
+
+        Returns:
+            _type_: _description_
+        """
         try:
-            if len(self.projects) == 0:
+            idsData = Path('data/projectIds.json')
+            AllprojectFile = Path('data') / f'project.json'
+            with open(AllprojectFile , 'r') as f:
+                AllProjects = json.load(f)
+            if idsData.stat().st_size > 0:
+                with open(idsData, 'r') as inputFile:
+                    ids = json.load(inputFile)
+                if projectId in ids:
+                    position = ids.index(projectId)
+                    i = 0
+                    if len(AllProjects) > 0:
+                        for i in range(len(AllProjects[position]["members"])):
+                            if username in AllProjects[position]["members"][i]:
+                                print("This project is found.")
+                    return projectId
+                else:
+                    return False
+            else:
                 print("You have not any project yet!")
-            for project in self.projects:
-                if project.id == projectId:
-                    print("This project is found.")
-                    return project
-            raise NotFoundError(projectId)
+                return False
         except Exception as e:
             print(f"Error finding project: {e}")
-            return None
         
         
+    
+    def AddMember(self ,projectId , projectTitle , username , requester):
+        """
+        Args:
+            projectId (_type_): _id of project_
+            projectTitle (_type_): _title of project_
+            username (_type_): _user_
+            requester (_type_): _requester for add member_
 
-    def AddMemmber(self ,projectId , projectTitle , username , requester):
+        Raises:
+            PremissionError: _description_
+        """
         try:
-            project = self.FindProject(projectId)
-            if project:
-                if requester == project.leader:
-                    if username not in project.members:
-                        project.members.append(username)
-                        self.SaveProject(project , projectId)
+            idsData = Path('data/projectIds.json')
+            AllprojectFile = Path('data') / f'project.json'
+            datafile = Path('data') / f'project_{projectId}.json'
+            with open(AllprojectFile , 'r') as f:
+                AllProjects = json.load(f)
+            if idsData.stat().st_size > 0:
+                with open(idsData, 'r') as inputFile:
+                    ids = json.load(inputFile)
+                if projectId in ids:
+                    position = ids.index(projectId)
+            with open(datafile , 'r') as f:
+                project1 = json.load(f)
+            if requester == AllProjects[position]["leader"]:
+                if len(AllProjects) > 0:
+                    if username not in AllProjects[position]["members"]:
+                        AllProjects[position]["members"].append(username)
+                        project1["members"].append(username)
+                        with open(AllprojectFile , 'w') as f:
+                            json.dump(AllProjects , f ,indent=4)
+                        with open(datafile , 'w') as f:
+                            json.dump(project1 , f , indent=4)
                         print(f"User {username} added to '{projectTitle}'.")
                     else:
-                        print(f"User {username} is already a member of '{projectTitle}'.")
-                else:
-                    raise PremissionError()
+                        print(f"User {username} is already a member of the project '{projectTitle}'.")
             else:
-                raise NotFoundError(projectTitle)
+                raise PremissionError()
         except ProjectError as e:
             print(f"Error adding memeber: {e}")
 
 
-
     def RemoveMember(self , projectId , projectTitle , username , requester):
+        """
+        Args:
+            projectId (_type_): _id of project_
+            projectTitle (_type_): _title of project_
+            username (_type_): _username_
+            requester (_type_): _requester for remove member_
+
+        Raises:
+            PremissionError: _description_
+        """
         try:
-            project = self.FindProject(projectId)
-            if project:
-                if requester == project.leader:
-                    self.projects.remove(project)
-                    self.Project(project)
-                    print(f"The member {username} removed successfully.")
+            idsData = Path('data/projectIds.json')
+            AllprojectFile = Path('data') / f'project.json'
+            datafile = Path('data') / f'project_{projectId}.json'
+            with open(AllprojectFile , 'r') as f:
+                AllProjects = json.load(f)
+            if idsData.stat().st_size > 0:
+                with open(idsData, 'r') as inputFile:
+                    ids = json.load(inputFile)
+                if projectId in ids:
+                    position = ids.index(projectId)
+            with open(datafile , 'r') as f:
+                project1 = json.load(f)
+            if requester == AllProjects[position]["leader"]:
+                if username == AllProjects[position]["leader"]:
+                    print("Sorry.You are leader.You can not remove yourself.")
                 else:
-                    raise PremissionError()
+                    if len(AllProjects) > 0:
+                        i = 0
+                        for i in range(len(AllProjects[position]["members"])):
+                            if username == AllProjects[position]["members"][i]:
+                                AllProjects[position]["members"].pop(i)
+                                project1["members"].pop(i)
+                                with open(AllprojectFile , 'w') as f:
+                                    json.dump(AllProjects , f ,indent=4)
+                                with open(datafile , 'w') as f:
+                                    json.dump(project1 , f , indent=4)
+                                print(f"User {username} removed from '{projectTitle}'.")
+                            else:
+                                print(f"User {username} is not a member of the project '{projectTitle}'.")
             else:
-                raise NotFoundError(projectTitle)
+                raise PremissionError()
         except ProjectError as e:
             print(f"Error removing memeber: {e}")
 
 
+    def DeletProject(self , projectId , projectTitle , requester):
+        """
+        Args:
+            projectId (_type_): _id of project_
+            projectTitle (_type_): _title of project_
+            requester (_type_): _requester for delet project_
 
-    def DeletProject(self , projectId , projectTitle , username , requester):
+        Raises:
+            PremissionError: _description_
+        """
         try:
-            project = self.FindProject(projectId)
+            idsData = Path('data/projectIds.json')
+            AllprojectFile = Path('data') / f'project.json'
+            with open(AllprojectFile , 'r') as f:
+                AllProjects = json.load(f)
+            if idsData.stat().st_size > 0:
+                with open(idsData, 'r') as inputFile:
+                    ids = json.load(inputFile)
+                if projectId in ids:
+                    position = ids.index(projectId)
+            project = self.FindProject(projectId , requester)
             if project:
-                if requester == project.leader:
-                    if project.leader == username:
-                        print("You can not remove yourself,you are leader!")
-                    elif username in project.members:
-                        project.members.remove(username)
-                        self.SaveProject(project , projectId)
-                        print(f"The project '{projectTitle}' deleted successfully.")
-                    else:
-                        print(f"User {username} is not a member of the project '{projectTitle}'.")
+                if requester == AllProjects[position]["leader"]:
+                    AllProjects.pop(position)
+                    ids.pop(position)
+                    dataFile = Path('data')/f'project_{projectId}.json'
+                    AllprojectFile = Path('data') / f'project.json'
+                    idsData = Path('data/projectIds.json')
+                    dataFile.unlink()
+                    print(f"The project '{projectTitle}' deleted successfully.")
                 else:
                     raise PremissionError()
-            else:
-                raise NotFoundError(projectTitle)
         except Exception as e:
             print(f"Error deleting project: {e}")
 
-
+   
     def LeaderProjects(self , username):
+        """_show list of projects that user a leader of those_
+
+        Args:
+            username (_type_): _username_
+        """
         try:
-            leaderProject = [project for project in self.projects if project.leader == username]
-            if len(leaderProject) == 0:
-                print("You are not a leader of any project.")
+            AllprojectFile = Path('data') / f'project.json'
+            with open(AllprojectFile , 'r') as f:
+                AllProjects = json.load(f)
+            it = 0
+            if len(AllProjects) > 0:
+                temp = 0
+                for it in range(len(AllProjects)):
+                    if username == AllProjects[it]["leader"]:
+                        print(f"{AllProjects[it]["title"]} / ID : {AllProjects[it]["id"]}")
+                        temp += 1
+                if temp == 0:
+                    print("You are not a leader of any project.")
             else:
-                return leaderProject
+                print("There is no project yet.")
         except Exception as e:
-            print(f"Error geting leader: {e}")
+            print(f"Error Showing project member: {e}")
 
 
+    
     def MemeberProject(self , username):
+        """_show list of projects that user just a member of those_
+
+        Args:
+            username (_type_): _username_
+        """
         try:
-            memberPtoject = [project for project in self.projects if username in project.members and username != project.leader]
-            if len(memberPtoject) == 0:
-                print("You are not a member of any project.")
-                return False
-            else:
-                return memberPtoject
+            AllprojectFile = Path('data') / f'project.json'
+            with open(AllprojectFile , 'r') as f:
+                AllProjects = json.load(f)
+            it = 0
+            if len(AllProjects) > 0:
+                for it in range(len(AllProjects)):
+                    i = 0
+                    temp = 0
+                    for i in range(len(AllProjects[it]["members"])):
+                        if username == AllProjects[it]["members"][i] and username != AllProjects[it]["leader"]:
+                            print(f"{AllProjects[it]["title"]} / ID : {AllProjects[it]["id"]}")
+                            temp += 1
+                if temp == 0:
+                    print("You are not a member of any project.")
         except Exception as e:
-            print(f"Error getting memeber: {e}")
-
-    def DisplayeProject(self , project):
-        print(f"Project ID: {project.id}")
-        print(f"Title: {project.title}")
-        print(f"Leader: {project.leader}")
-        print(f"Members: {''.join.project.members}")
-        print(f"Tasks: {project.tasks}")
-
+            print(f"Error Showing project member: {e}")
