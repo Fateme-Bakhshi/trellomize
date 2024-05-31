@@ -2,7 +2,7 @@ import hashlib, os, json
 from pathlib import Path #for file handling
 import re
 
-usernames_file = Path('Data/Usernames.json')
+usernames_file = Path('Users_Data/Usernames.json')
 
 class User:
     def __init__(self, username, password, email, is_manager=False, active=True) :
@@ -48,7 +48,7 @@ class User:
         
     
 class UserManager:
-    def __init__(self, data_files = 'Data\\Users'):
+    def __init__(self, data_files = 'Users_Data\\Users'):
         self.data_file = Path(data_files)
         self.user = User('', '', '')
     
