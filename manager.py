@@ -3,27 +3,32 @@ import json , os, logging
 from pathlib import Path
 from Users.user import User
 from Users.user import UserManager
+from Users.validation import validService
 
 logging.basicConfig(filename="logFile/actions.log", format='%(asctime)s - %(message)s', filemode='a', level=logging.DEBUG)
 
-usernames_file = Path('Data/Usernames.json')
-manager_file = Path('Data\\Manager.json')
-users_file = Path('Data\\Users')
-#project file
-#task file
+usernames_file = Path('Users_Data/Usernames.json')
+manager_file = Path('Users_Data\\Manager.json')
+users_file = Path('Users_Data\\Users')
+project_file = Path('Projects_Data')
 logfile = Path('logFile/actions.log')
 
 def create_admin(Username, Password):
-    if find_manager(Username):
-        print('Admin already exists.')
-    elif os.path.exists(manager_file):
-        update_manager(Username, Password)
-        print('Admin updated successfully.')
-        logging.info(f'Manager updated to "{Username}".')
-    else:
-        save_manager(Username, Password)
-        print('Admin created successfully.')
-        logging.info(f'"{Username}" was created as a Manager.')
+    valid_service = validService()
+    try:
+        if valid_service.are_valid_fields(Username, Password):
+            if find_manager(Username):
+                print('Admin already exists.')
+            elif os.path.exists(manager_file):
+                update_manager(Username, Password)
+                print('Admin updated successfully.')
+                logging.info(f'Manager updated to "{Username}".')
+            else:
+                save_manager(Username, Password)
+                print('Admin created successfully.')
+                logging.info(f'"{Username}" was created as a Manager.')
+    except ValueError as error:
+        print(f'There is an error: {error}')
 
 
 def find_manager(Username):
@@ -64,7 +69,7 @@ def update_manager(Username, Password):
     with open(manager_file, 'r') as input: 
         manager = json.load(input)
         manager_username = manager['Username'] 
-    manager_as_user = Path(f'Data\\Users/{manager_username}.json')
+    manager_as_user = Path(f'Uses_Data\\Users/{manager_username}.json')
     os.unlink(manager_as_user)
     
     usernames = []
@@ -83,8 +88,7 @@ def purge_data():
     while True:
         try:
             if confirmation.lower() == 'yes':
-                for data_path in [users_file #, project_file, #task_file 
-                            ]:
+                for data_path in [users_file, project_file]:
                     for filename in os.listdir(data_path): #Get a list of all the files in the desired folder
                         file_path = os.path.join(data_path, filename)
                         os.unlink(file_path) #deleting the data
