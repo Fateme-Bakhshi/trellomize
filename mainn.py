@@ -5,7 +5,13 @@ from rich.console import Console
 from rich.prompt import Prompt
 from rich import print
 from rich.panel import Panel
+import logging
+from Projects_And_Tasks.project import ProjectManager
+from Projects_And_Tasks.Projects_menu import Main
 
+
+
+logging.basicConfig(filename="logFile/actions.log", format='%(asctime)s - %(message)s', filemode='a', level=logging.DEBUG)
 
 class main:
     def __init__(self):
@@ -29,10 +35,10 @@ class main:
         console.rule(title, style="bold white")
         time.sleep(1)
     
-    def display_choices(self, choices, width):
+    def display_choices(self, choices, width, justify):
         console = Console()
         for option, title in enumerate(choices):
-            console.print(Panel(title,title=str(option+1),title_align="center", width=width, border_style="bold deep_sky_blue1"), justify="center")
+            console.print(Panel(title,title=str(option+1),title_align="center", width=width, border_style="bold deep_sky_blue1"), justify=justify)
             time.sleep(0.2)
     
     def exit_program(self):
@@ -42,15 +48,15 @@ class main:
         exit(1)
     
     def back_or_continue(self):
-        console = Console()
+        print('\n')
         choices = ['Continue', 'Back']
-        self.display_choices(self, choices, 12)
+        self.display_choices(choices, 12, 'left')
         choice = input()
         while True:
-            if choice == '0' or choice == '1':
+            if choice == '1' or choice == '2':
                 return int(choice)
             else:
-                choice = input('Please enter a valid number(0 or 1): ')
+                choice = input('Please enter a valid number(1 or 2): ')
                     
     def log_or_sign(self):
         self.clear_screen()
@@ -60,8 +66,8 @@ class main:
         while True:
             self.show_title("[bold deep_sky_blue1]Login/Sign Up")
             print("\n")
-            self.display_choices(['Login', 'Sign Up', 'Exit'], 12)
-            choice = input("                                                                      Enter your choice: ")
+            self.display_choices(['Login', 'Sign Up', 'Exit'], 12, 'center')
+            choice = input("                                                                 Enter your choice: ")
               
             while True:
                 if(choice == '1'):
@@ -71,9 +77,10 @@ class main:
                     self.sign_up()
                     break
                 elif(choice == '3'):
+                    exit(1)
                     self.exit_program()
                 else:
-                    choice = input("                                                             Please enter a valid number(1-3): ")
+                    choice = input("                                               Please enter a valid number(1-3): ")
         
     def login(self):
         self.show_title("[bold deep_sky_blue3]Login")
@@ -83,10 +90,12 @@ class main:
         print('\n')
         self.user = self.valid_service.log_in(username, password)
         if self.user:
+            logging.info(f'{self.user.username} has successfully logged in.')
             self.user_dashboard()
         else:
-            if self.back_or_continue():
+            if self.back_or_continue() == 1:
                 self.login()
+            return
         
     def sign_up(self):
         self.show_title("[bold deep_sky_blue3]Sign Up")
@@ -98,8 +107,11 @@ class main:
         
         user = self.valid_service.sign_Up(username, password, email)
         if not user:
-            if self.back_or_continue():
+            if self.back_or_continue() == 1:
                 self.sign_up()
+        else:
+            logging.info(f'{user.username} has successfully signed up.')
+        return
             
     
     def user_dashboard(self):
@@ -110,14 +122,20 @@ class main:
             choices = ['Pre-made projects', 'Making a new project']
             if not self.user.is_Manager:
                 choices.extend(['Back', 'Exit'])
-                self.display_choices(choices, 20)
+                self.display_choices(choices, 20, 'center')
             else:
                 choices.extend(['Deactivating an account', 'Activating an account', 'Back', 'Exit'])
-                self.display_choices(choices, 20)
+                self.display_choices(choices, 20, 'center')
             
 
-            choice2 = input('                                                                     Enter your choice: ')
+            choice2 = input('                                                               Enter your choice: ')
             while True:
+                if choice2 == '1':
+                    self.Pre_made_projects()
+                    break
+                if choice2 == '2':
+                    self.making_new_project()
+                    break
                 if (choice2 == '3' and not self.user.is_Manager):
                     return
                 if (choice2 == '4' and not self.user.is_Manager):
@@ -135,6 +153,33 @@ class main:
                 else:
                     choice2 = input('                                                                  Please enter a valid number: ')
                 
+    def making_new_project(self):
+        self.show_title("[bold deep_sky_blue3]New Project")
+        projectManager = ProjectManager()
+        projectManager.CreateProject(self.user)
+        logging.info(f'{self.user.username} added a new project with ')
+        time.sleep(3.5)
+        
+    def Pre_made_projects(self):
+        while True:
+            self.show_title("[bold deep_sky_blue3]Pre Projects")
+            print('\n')
+            choices = ['Projects you are a member of'
+                    ,'Projects you are a leader of'
+                    ,'View all projects and manage tasks'
+                    ,'View all projects and managing them'
+                    ,'Back'
+                    ,'Exit']
+            self.display_choices(choices, 27, 'center')
+            choice = input('                                                               Enter your choice: ')
+            if choice == '5':
+                break
+            if choice == '6':
+                self.exit_program()
+            username = self.user.username
+            Main(choice, username)
+        
+        
     def deactivating_user(self):
         self.show_title("[bold deep_sky_blue3]Deactivating User")
         
@@ -156,4 +201,3 @@ if __name__ == "__main__":
     m = main()
     m.log_or_sign()
     
-#python mainn.py
