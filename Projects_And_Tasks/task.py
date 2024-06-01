@@ -1,5 +1,4 @@
 
-
 import json, uuid #for save file #for unic id
 from pathlib import Path  #for save file
 from datetime import datetime,timedelta #for time
@@ -55,7 +54,7 @@ class Task:
             'description' : self.description,
             'startTime' : self.startTime.isoformat(),
             'endTime' : self.endTime.isoformat(),
-            'assignees' : self.assignees,
+            'assigners' : self.assignees,
             'priority' : self.priority,
             'status' : self.status,
             'history' : self.history,
@@ -131,8 +130,8 @@ class TaskManager(Task):
                             json.dump(project , f , indent=4)
                         with open(AllprojectFile , 'w') as f:
                             json.dump(AllProjects , f , indent=4)
-                        print(f'Task {AllProjects[i]["tasks"][int(position) - 1]["title"]} created successfully with Id {AllProjects[i]["tasks"][int(position) - 1]["id"]}.')
-                        logging.info(f'Task {AllProjects[i]["tasks"][int(position) - 1]["title"]} created successfully with Id {AllProjects[i]["tasks"][int(position) - 1]["id"]}.')
+                        print(f'Task "{AllProjects[i]["tasks"][int(position) - 1]["title"]}" created successfully with Id {AllProjects[i]["tasks"][int(position) - 1]["id"]}.')
+                        logging.info(f'Task "{AllProjects[i]["tasks"][int(position) - 1]["title"]}" created successfully with Id {AllProjects[i]["tasks"][int(position) - 1]["id"]}.')
                         break
         except Exception as e:
             print(f"Error creating task: {e}")
@@ -151,7 +150,7 @@ class TaskManager(Task):
             PremissionError: _description_
         """
         try:
-            datafile = Path('Data') / f'project_{projectId}.json'
+            datafile = Path('Projects_Data') / f'project_{projectId}.json'
             with open(datafile,'r') as f:
                 project = json.load(f)
             with open(AllprojectFile , 'r') as f:
@@ -165,22 +164,24 @@ class TaskManager(Task):
                     if len(AllProjects) > 0: 
                         for j in range(len(AllProjects[position]["tasks"])):
                             if TaskId == AllProjects[position]["tasks"][j]["id"]:
-                                if username not in AllProjects[position]["tasks"][j]["assignees"]:
-                                    AllProjects[position]["tasks"][j]["assignees"].append(username)
+                                if username not in AllProjects[position]["tasks"][j]["assigners"]:
+                                    AllProjects[position]["tasks"][j]["assigners"].append(username)
                                     time = str(datetime.now())
                                     action = f'{username} add to the task {AllProjects[position]["tasks"][j]["title"]}.'
                                     historyDict = self.ToDictHistory(requester , time , action)
                                     AllProjects[position]["tasks"][j]["history"].append(historyDict)
-                                    project["tasks"][j]["assignees"].append(username)
+                                    project["tasks"][j]["assigners"].append(username)
                                     project["tasks"][j]["history"].append(historyDict)
                                     with open(AllprojectFile , 'w') as f:
                                         json.dump(AllProjects , f ,indent=4)
                                     with open(datafile , 'w') as f:
                                         json.dump(project , f , indent=4)
-                                    print(f'User {username} added to "{AllProjects[position]["tasks"][j]["title"]}".')
-                                    logging.info(f'User {username} added to "{AllProjects[position]["tasks"][j]["title"]}".')
+                                    print(f'User "{username}" added to "{AllProjects[position]["tasks"][j]["title"]}".')
+                                    logging.info(f'User "{username}" added to "{AllProjects[position]["tasks"][j]["title"]}" task.')
+                                    return
                                 else:
                                     print(f'User {username} is already a member of the task "{AllProjects[position]["tasks"][j]["title"]}".')
+                                    return
             else:
                 raise PremissionError()
         except ProjectError as e:
@@ -199,7 +200,7 @@ class TaskManager(Task):
             PremissionError: _description_
         """
         try:
-            datafile = Path('Data') / f'project_{projectId}.json'
+            datafile = Path('Projects_Data') / f'project_{projectId}.json'
             with open(datafile , 'r') as f:
                 project = json.load(f)
             with open(AllprojectFile , 'r') as f:
@@ -212,15 +213,17 @@ class TaskManager(Task):
             if requester == AllProjects[position]["leader"]:
                     if len(AllProjects) > 0:
                         i = 0 
+                        temp = 0
                         for j in range(len(AllProjects[position]["tasks"])):
                                 if TaskId == AllProjects[position]["tasks"][j]["id"]:
-                                    for i in range(len(AllProjects[position]["tasks"][j]["assignees"])):
-                                        if username == AllProjects[position]["tasks"][j]["assignees"][i]:
+                                    for i in range(len(AllProjects[position]["tasks"][j]["assigners"])):
+                                        if username == AllProjects[position]["tasks"][j]["assigners"][i]:
+                                            temp += 1
                                             time = str(datetime.now())
                                             action = f'{username} remove from the task {AllProjects[position]["tasks"][j]["title"]}'
                                             historyDict = self.ToDictHistory(requester , time , action)
-                                            AllProjects[position]["tasks"][j]["assignees"].pop(i)
-                                            project['tasks'][j]['assignees'].pop(i)
+                                            AllProjects[position]["tasks"][j]["assigners"].pop(i)
+                                            project['tasks'][j]['assigners'].pop(i)
                                             AllProjects[position]["tasks"][j]["history"].append(historyDict)
                                             project["tasks"][j]["history"].append(historyDict)
                                             with open(AllprojectFile , 'w') as f:
@@ -228,9 +231,11 @@ class TaskManager(Task):
                                             with open(datafile , 'w') as f:
                                                 json.dump(project , f , indent=4)
                                             print(f'User {username} removed from "{AllProjects[position]["tasks"][j]["title"]}"".')
-                                            logging.info(f'User {username} removed from "{AllProjects[position]["tasks"][j]["title"]}".')
-                                        else:
-                                            print(f'User {username} is not a member of the task "{AllProjects[position]["tasks"][j]["title"]}"".')
+                                            logging.info(f'User "{username}" removed from "{AllProjects[position]["tasks"][j]["title"]}" task.')
+                                            return
+                                    if temp == 0:
+                                        print(f'User {username} is not a member of the task "{AllProjects[position]["tasks"][j]["title"]}".')
+                                        return
             else:
                 raise PremissionError()
         except ProjectError as e:
@@ -246,7 +251,7 @@ class TaskManager(Task):
         """
         try:
             description = input("Enter your comment:")
-            datafile = Path('Data') / f'project_{projectId}.json'
+            datafile = Path('Projects_Data') / f'project_{projectId}.json'
             with open(AllprojectFile , 'r') as f:
                 AllProjects = json.load(f)
             with open(datafile , 'r') as f:
@@ -265,7 +270,7 @@ class TaskManager(Task):
                             with open(datafile , 'w') as f:
                                 json.dump(project , f , indent=4)
                             print(f"You successfully commented.")
-                            logging.info(f"{user} commented on {AllProjects[i]['tasks'][j]['title']} task.")
+                            logging.info(f"'{user}' commented on '{AllProjects[i]['tasks'][j]['title']}' task.")
         except Exception as e:
             print(f"Error commenting task: {e}")
 
@@ -278,7 +283,7 @@ class TaskManager(Task):
             username (_type_): _username_
         """
         try:
-            datafile = Path('Data') / f'project_{projectId}.json'
+            datafile = Path('Projects_Data') / f'project_{projectId}.json'
             with open(AllprojectFile , 'r') as f:
                 AllProjects = json.load(f)
             with open(datafile , 'r') as f:
@@ -288,11 +293,11 @@ class TaskManager(Task):
             for it in range(len(AllProjects)):
                 for it1 in range(len(AllProjects[it]["tasks"])):
                     if TaskId == AllProjects[it]["tasks"][it1]["id"]:
-                        if username in AllProjects[it]["tasks"][it1]["assignees"] or username == AllProjects[it]["leader"]:
+                        if username in AllProjects[it]["tasks"][it1]["assigners"] or username == AllProjects[it]["leader"]:
                             print("\n")
                             print("[1] Title")
                             print("[2] Description")
-                            print("[3] Assignees")
+                            print("[3] Assigners")
                             print("[4] Priority")
                             print("[5] Status")
                             print("[6] Add Comment")
@@ -315,7 +320,7 @@ class TaskManager(Task):
                                                     with open(datafile , 'w') as f:
                                                         json.dump(project , f , indent=4)
                                                     print("Title changed successfully")
-                                                    logging.info(f'task {AllProjects[i]["tasks"][j]["title"]} changed to {newTitle}.')
+                                                    logging.info(f'task "{AllProjects[i]["tasks"][j]["title"]}" changed to "{newTitle}".')
                                                     return
                                                         
 
@@ -335,7 +340,7 @@ class TaskManager(Task):
                                                     with open(datafile , 'w') as f:
                                                         json.dump(project , f , indent=4)
                                                     print("description changed successfully")
-                                                    logging.info(f'task {AllProjects[i]["tasks"][j]["description"]} changed to {newDes}.')
+                                                    logging.info(f'description "{AllProjects[i]["tasks"][j]["description"]}" changed to "{newDes}".')
                                                     return
                                                         
 
@@ -397,7 +402,7 @@ class TaskManager(Task):
                                                         with open(datafile , 'w') as f:
                                                             json.dump(project , f , indent=4)
                                                         print("Priority changed successfully")
-                                                        logging.info(f'Priority changed from {project["tasks"][j]["priority"]} to {newPriority}.')
+                                                        logging.info(f'Priority changed from "{project["tasks"][j]["priority"]}" to "{newPriority}".')
                                                         return
                                     except Exception as e:
                                         print(f"Error Changing Priority: {e}")
@@ -437,7 +442,7 @@ class TaskManager(Task):
                                                         with open(datafile , 'w') as f:
                                                             json.dump(project , f , indent=4)
                                                         print("Status changed successfully")
-                                                        logging.info(f'Status changed from {project["tasks"][j]["status"]} to {newStatus}.')
+                                                        logging.info(f'Status changed from "{project["tasks"][j]["status"]}" to "{newStatus}".')
                                                         return
                                     except Exception as e:
                                         print(f"Error Changing Status: {e}")
@@ -477,7 +482,7 @@ class TaskManager(Task):
             print(f' Status: {task["status"]}')
             print(f' Start Time: {task["startTime"]}')
             print(f' End Time: {task["endTime"]}')
-            print(f' Assignees: {", ".join(task["assignees"])}')
+            print(f' Assigners: {", ".join(task["assigners"])}')
             print(" History:")
             for i in range(len(task["history"])):
                 print(f"{int(i) + 1}.")
