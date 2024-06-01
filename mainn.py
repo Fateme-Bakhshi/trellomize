@@ -1,7 +1,5 @@
-
 from Users.validation import validService
-import os, time, sys #for show_slowly func
-from rich.markdown import Markdown
+import os, time, sys #for print_slowly func
 from rich.console import Console
 from rich.prompt import Prompt
 from rich import print
@@ -78,7 +76,6 @@ class main:
                     self.sign_up()
                     break
                 elif(choice == '3'):
-                    exit(1)
                     self.exit_program()
                 else:
                     choice = input("                                               Please enter a valid number(1-3): ")
@@ -158,7 +155,6 @@ class main:
         self.show_title("[bold deep_sky_blue3]New Project")
         projectManager = ProjectManager()
         projectManager.CreateProject(self.user)
-        logging.info(f'{self.user.username} added a new project with ')
         time.sleep(3.5)
         
     def Pre_made_projects(self):
@@ -187,7 +183,9 @@ class main:
         username = Prompt.ask('Enter the userename you want to deactivate')
         password = Prompt.ask('Enter the password of the account', password=True)
         print('\n')
-        self.valid_service.deactivate_user(username, password)
+        deactivated = self.valid_service.deactivate_user(username, password)
+        if deactivated:
+            logging.info(f'{username} has been deactivated.')
 
     def activating_user(self):
         self.show_title("[bold deep_sky_blue3]Activating User")
@@ -195,7 +193,9 @@ class main:
         username = Prompt.ask('Enter the userename you want to activate')
         password = Prompt.ask('Enter the password of the account', password=True)
         print('\n')
-        self.valid_service.activate_user(username, password)
+        deactivated = self.valid_service.activate_user(username, password)
+        if deactivated:
+            logging.info(f'{username} has been activated.')
         
         
 if __name__ == "__main__":
