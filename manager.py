@@ -1,4 +1,3 @@
-
 import argparse #terminal management
 import json , os, logging
 from pathlib import Path
