@@ -1,7 +1,5 @@
-
-import hashlib, os, json
+import hashlib, os, json, re
 from pathlib import Path #for file handling
-import re
 
 usernames_file = Path('Users_Data/Usernames.json')
 
@@ -12,9 +10,8 @@ class User:
         self.email = email
         self.activate = active
         self.is_Manager = is_manager
-    
-    @staticmethod    
-    def hash_password(password):         
+      
+    def hash_password(self, password):         
         """
         Hashes a password using SHA-256 if it's not hashed already.
         
