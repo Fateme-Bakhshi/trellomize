@@ -1,4 +1,3 @@
-
 import json #for save file
 from pathlib import Path  #for save file
 import os, logging
@@ -126,8 +125,8 @@ class ProjectManager(Project):
             if os.path.exists(idData):
                 with open(idData, 'r') as idFile:
                     ids = json.load(idFile)
-                    if not(project["id"] in ids):
-                        ids.append(project["id"])
+            if not(project["id"] in ids):
+                ids.append(project["id"])
             with open(idData, 'w') as id: 
                 json.dump(ids , id)
         except IOError as e:
@@ -230,6 +229,7 @@ class ProjectManager(Project):
                         with open(datafile , 'w') as f:
                             json.dump(project1 , f , indent=4)
                         print(f"User {username} added to '{projectTitle}'.")
+                        logging.info(f"User {username} added to '{projectTitle}'.")
                     else:
                         print(f"User {username} is already a member of the project '{projectTitle}'.")
             else:
@@ -268,8 +268,10 @@ class ProjectManager(Project):
                 else:
                     if len(AllProjects) > 0:
                         i = 0
+                        temp = 0
                         for i in range(len(AllProjects[position]["members"])):
                             if username == AllProjects[position]["members"][i]:
+                                temp += 1
                                 AllProjects[position]["members"].pop(i)
                                 project1["members"].pop(i)
                                 with open(AllprojectFile , 'w') as f:
@@ -277,8 +279,10 @@ class ProjectManager(Project):
                                 with open(datafile , 'w') as f:
                                     json.dump(project1 , f , indent=4)
                                 print(f"User {username} removed from '{projectTitle}'.")
-                            else:
-                                print(f"User {username} is not a member of the project '{projectTitle}'.")
+                                logging.info(f"User {username} removed from '{projectTitle}'.")
+                        if temp == 0:
+                            print(f"User {username} is not a member of the project '{projectTitle}'.")
+                        return
             else:
                 raise PremissionError()
         except ProjectError as e:
@@ -317,6 +321,7 @@ class ProjectManager(Project):
                     with open(idsData , 'w') as f:
                         json.dump(ids , f , indent=4)
                     print(f"The project '{projectTitle}' deleted successfully.")
+                    logging.info(f"The project '{projectTitle}' deleted.")
                 else:
                     raise PremissionError()
         except Exception as e:
