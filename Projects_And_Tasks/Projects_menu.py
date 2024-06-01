@@ -1,10 +1,9 @@
-
 from .task import TaskManager
 from .task import TableTask
 from .project import ProjectManager
 import json #for save file
 from pathlib import Path  #for save file
-import os, logging, time
+import os, logging, time, sys
 from rich.console import Console
 from Users.user import UserManager
 
@@ -12,6 +11,7 @@ logging.basicConfig(filename="logFile/actions.log", format='%(asctime)s - %(mess
 
 def clear_screen():
     os.system('cls')
+    
 
 def show_title(title):
     clear_screen()
@@ -113,7 +113,7 @@ def ProjectMenu(projectManager , project , username):
                     print(f' Title: {project["tasks"][i]["title"]}')
                     print(f' ID: {project["tasks"][i]["id"]}')
                     print(f' Description: {project["tasks"][i]["description"]}')
-                    print(f' Assignees: {",".join(project["tasks"][i]["assignees"])}')
+                    print(f' Assigners: {",".join(project["tasks"][i]["assigners"])}')
                     print(f' Start Time: {project["tasks"][i]["startTime"]}')
                     print(f' End Time: {project["tasks"][i]["endTime"]}')
                     print(f' Priority: {project["tasks"][i]["priority"]}')
@@ -139,7 +139,7 @@ def ProjectMenu(projectManager , project , username):
                 i = 0
                 temp = 0
                 for i in range(len(project["tasks"])):
-                    if member in project["tasks"][i]["assignees"]:
+                    if member in project["tasks"][i]["assigners"]:
                         temp += 1
                         print(f'{member} assigned to this task {project["tasks"][i]["title"]}')
                 if temp == 0:
@@ -209,7 +209,7 @@ def Main(choice, username):
             if back():
                 break
         elif choice == '5':
-            break
+            return
         elif choice == '6':
             exit(1)
         else:
