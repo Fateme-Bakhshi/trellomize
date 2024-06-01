@@ -1,4 +1,3 @@
-
 from Users.user import UserManager
 import time, re #for checking email
 from rich.console import Console
@@ -78,11 +77,11 @@ class validService:
                     self.user_manager.save_user(user)
                     console.print(f'{Username} has been successfully deactivated.', style='bold deep_sky_blue1')
                     time.sleep(2.5)
-                    return user
+                    return True
                 else:
                     console.print(f'{Username} is already inactivated.', style='dark_orange')
                     time.sleep(2.5)
-                    return None
+                    return False
                 
         except ValueError as error:
             console.print(f'An error occured: {str(error)}', style='dark_orange')
@@ -102,11 +101,11 @@ class validService:
                     self.user_manager.save_user(user)
                     console.print(f'{Username} has been successfully activated.', style='bold deep_sky_blue1')
                     time.sleep(2.5)
-                    return user
+                    return True
                 else:
                     console.print(f'{Username} is already activated.', style='dark_orange')
                     time.sleep(2.5)
-                    return None
+                    return False
         except ValueError as error:
             console.print(f'An error occured: {str(error)}', style='dark_orange')
             time.sleep(3.5)
