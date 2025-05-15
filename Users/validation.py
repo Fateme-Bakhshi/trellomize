@@ -111,4 +111,8 @@ class validService:
             time.sleep(3.5)
         except FileNotFoundError as error:
             console.print(error, style='dark_orange')
+<<<<<<< HEAD
             time.sleep(3.5)
+=======
+            time.sleep(3.5)
+>>>>>>> ca95177 (Update Everything)

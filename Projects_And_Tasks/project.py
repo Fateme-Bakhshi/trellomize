@@ -1,6 +1,11 @@
 import json #for save file
 from pathlib import Path  #for save file
 import os, logging
+<<<<<<< HEAD
+=======
+from rich.console import Console
+from rich.table import Table
+>>>>>>> ca95177 (Update Everything)
 
 logging.basicConfig(filename="logFile/actions.log", format='%(asctime)s - %(message)s', filemode='a', level=logging.DEBUG)
 
@@ -83,6 +88,10 @@ class ProjectManager(Project):
         Returns:
             _type_: _description_
         """
+<<<<<<< HEAD
+=======
+        console = Console()
+>>>>>>> ca95177 (Update Everything)
         try:
             if self.findId(projectId):
                 project = Project(title , projectId , leader)
@@ -90,12 +99,20 @@ class ProjectManager(Project):
                 project["leader"] = leader
                 project["members"].append(leader)
                 self.SaveProject(project)
+<<<<<<< HEAD
                 print(f"Project '{title}' created successfully with Id {projectId} .")
+=======
+                console.print(f"\nProject '{title}' created successfully with Id {projectId} .", style='bold deep_sky_blue1')
+>>>>>>> ca95177 (Update Everything)
                 return True
             else:
                 raise ValueError(projectId)
         except Exception as e:
+<<<<<<< HEAD
             print(f"Error adding project: {e}")
+=======
+            console.print(f"\nError adding project: {e}", style='dark_orange')
+>>>>>>> ca95177 (Update Everything)
 
         
     def SaveProject(self , project):
@@ -104,6 +121,10 @@ class ProjectManager(Project):
         Args:
             project (_type_): _dict or object_
         """
+<<<<<<< HEAD
+=======
+        console = Console()
+>>>>>>> ca95177 (Update Everything)
         try:
             AllprojectFile = self.data_folder / 'project.json'
             datafile = self.data_folder / f"project_{project['id']}.json"
@@ -130,7 +151,11 @@ class ProjectManager(Project):
             with open(idData, 'w') as id: 
                 json.dump(ids , id)
         except IOError as e:
+<<<<<<< HEAD
             print(f"Error saving project : {e}")     
+=======
+            console.print(f"\nError saving project: {e}", style='dark_orange')    
+>>>>>>> ca95177 (Update Everything)
 
 
         
@@ -138,24 +163,40 @@ class ProjectManager(Project):
         """
             creat project
         """
+<<<<<<< HEAD
+=======
+        console = Console()
+>>>>>>> ca95177 (Update Everything)
         try:
             title = input("Enter project title: ")
             leader = leader.username
             while True:
                 projectId = input("Enter project ID: ")
                 while not projectId.isdigit():
+<<<<<<< HEAD
                     print("Sorry.You can just use number for ID.")
                     projectId = input("Enter project ID: ")
                     break
                 while len(projectId) < 4:
                     print("Your project ID must be atleast 4 digits")
+=======
+                    console.print("\nSorry.You can just use number for ID.", style='dark_orange') 
+                    projectId = input("Enter project ID: ")
+                    break
+                while len(projectId) < 4:
+                    console.print("\nYour project ID must be atleast 4 digits.", style='dark_orange') 
+>>>>>>> ca95177 (Update Everything)
                     projectId = input("Enter project ID: ")
                     break
                 if(self.AddProject(title , projectId , leader)):
                     logging.info(f'{leader} added a new project with {title} title and {projectId} id.')
                     break
         except Exception as e:
+<<<<<<< HEAD
             print(f"Error creating project: {e}")
+=======
+            console.print(f"\nError creating project: {e}", style='dark_orange') 
+>>>>>>> ca95177 (Update Everything)
 
 
    
@@ -169,6 +210,10 @@ class ProjectManager(Project):
         Returns:
             _type_: _description_
         """
+<<<<<<< HEAD
+=======
+        console = Console()
+>>>>>>> ca95177 (Update Everything)
         try:
             idsData = Path('Projects_Data/projectIds.json')
             AllprojectFile = self.data_folder / f'project.json'
@@ -183,15 +228,26 @@ class ProjectManager(Project):
                     if len(AllProjects) > 0:
                         for i in range(len(AllProjects[position]["members"])):
                             if username in AllProjects[position]["members"][i]:
+<<<<<<< HEAD
                                 print("This project is found.")
+=======
+                                console.print(f"\nThis project is found.", style='bold deep_sky_blue1')
+>>>>>>> ca95177 (Update Everything)
                     return projectId
                 else:
                     return False
             else:
+<<<<<<< HEAD
                 print("You have not any project yet!")
                 return False
         except Exception as e:
             print(f"Error finding project: {e}")
+=======
+                console.print("\nYou have no projects yet!", style='dark_orange')
+                return False
+        except Exception as e:
+            console.print(f"\nError finding project: {e}", style='dark_orange') 
+>>>>>>> ca95177 (Update Everything)
         
         
     
@@ -206,6 +262,10 @@ class ProjectManager(Project):
         Raises:
             PremissionError: _description_
         """
+<<<<<<< HEAD
+=======
+        console = Console()
+>>>>>>> ca95177 (Update Everything)
         try:
             idsData = Path('Projects_Data/projectIds.json')
             AllprojectFile = self.data_folder / f'project.json'
@@ -228,6 +288,7 @@ class ProjectManager(Project):
                             json.dump(AllProjects , f ,indent=4)
                         with open(datafile , 'w') as f:
                             json.dump(project1 , f , indent=4)
+<<<<<<< HEAD
                         print(f"User {username} added to '{projectTitle}'.")
                         logging.info(f"User {username} added to '{projectTitle}'.")
                     else:
@@ -236,6 +297,16 @@ class ProjectManager(Project):
                 raise PremissionError()
         except ProjectError as e:
             print(f"Error adding memeber: {e}")
+=======
+                        console.print(f"\nUser {username} added to '{projectTitle}'.", style='bold deep_sky_blue1')
+                        logging.info(f"User {username} added to '{projectTitle}'.")
+                    else:
+                        console.print(f"\nUser {username} is already a member of the project '{projectTitle}'.", style='dark_orange') 
+            else:
+                raise PremissionError()
+        except ProjectError as e:
+            console.print(f"\nError adding memeber: {e}", style='dark_orange') 
+>>>>>>> ca95177 (Update Everything)
 
 
     def RemoveMember(self , projectId , projectTitle , username , requester):
@@ -249,6 +320,10 @@ class ProjectManager(Project):
         Raises:
             PremissionError: _description_
         """
+<<<<<<< HEAD
+=======
+        console = Console()
+>>>>>>> ca95177 (Update Everything)
         try:
             idsData = Path('Projects_Data/projectIds.json')
             AllprojectFile = self.data_folder / f'project.json'
@@ -264,7 +339,11 @@ class ProjectManager(Project):
                 project1 = json.load(f)
             if requester == AllProjects[position]["leader"]:
                 if username == AllProjects[position]["leader"]:
+<<<<<<< HEAD
                     print("Sorry.You are leader.You can not remove yourself.")
+=======
+                    console.print(f"\nSorry.You are leader.You can not remove yourself.", style='dark_orange') 
+>>>>>>> ca95177 (Update Everything)
                 else:
                     if len(AllProjects) > 0:
                         i = 0
@@ -278,15 +357,26 @@ class ProjectManager(Project):
                                     json.dump(AllProjects , f ,indent=4)
                                 with open(datafile , 'w') as f:
                                     json.dump(project1 , f , indent=4)
+<<<<<<< HEAD
                                 print(f"User {username} removed from '{projectTitle}'.")
                                 logging.info(f"User {username} removed from '{projectTitle}'.")
                         if temp == 0:
                             print(f"User {username} is not a member of the project '{projectTitle}'.")
+=======
+                                console.print(f"\nUser {username} successfully removed from '{projectTitle}'.", style='bold deep_sky_blue1')
+                                logging.info(f"User {username} removed from '{projectTitle}'.")
+                        if temp == 0:
+                            console.print(f"\nUser {username} is not a member of the project '{projectTitle}'.", style='dark_orange') 
+>>>>>>> ca95177 (Update Everything)
                         return
             else:
                 raise PremissionError()
         except ProjectError as e:
+<<<<<<< HEAD
             print(f"Error removing memeber: {e}")
+=======
+            console.print(f"\nError removing memeber: {e}", style='dark_orange') 
+>>>>>>> ca95177 (Update Everything)
 
 
     def DeletProject(self , projectId , projectTitle , requester):
@@ -299,6 +389,10 @@ class ProjectManager(Project):
         Raises:
             PremissionError: _description_
         """
+<<<<<<< HEAD
+=======
+        console = Console()
+>>>>>>> ca95177 (Update Everything)
         try:
             idsData = Path('Projects_Data/projectIds.json')
             AllprojectFile = self.data_folder / f'project.json'
@@ -320,12 +414,20 @@ class ProjectManager(Project):
                         json.dump(AllProjects , f ,indent=4)
                     with open(idsData , 'w') as f:
                         json.dump(ids , f , indent=4)
+<<<<<<< HEAD
                     print(f"The project '{projectTitle}' deleted successfully.")
+=======
+                    console.print(f"\nThe project '{projectTitle}' deleted successfully.", style='bold deep_sky_blue1')
+>>>>>>> ca95177 (Update Everything)
                     logging.info(f"The project '{projectTitle}' deleted.")
                 else:
                     raise PremissionError()
         except Exception as e:
+<<<<<<< HEAD
             print(f"Error deleting project: {e}")
+=======
+            console.print(f"\nError deleting project: {e}", style='dark_orange')
+>>>>>>> ca95177 (Update Everything)
 
    
     def LeaderProjects(self , username):
@@ -334,6 +436,7 @@ class ProjectManager(Project):
         Args:
             username (_type_): _username_
         """
+<<<<<<< HEAD
         clear_screen()
         try:
             AllprojectFile = self.data_folder / f'project.json'
@@ -354,6 +457,36 @@ class ProjectManager(Project):
             print(f"Error Showing project member: {e}")
 
 
+=======
+        console = Console()
+        try:
+            all_project_file = self.data_folder / 'project.json'
+            if os.path.exists(all_project_file):
+                with open(all_project_file, 'r') as file:
+                    all_projects = json.load(file)
+
+                if len(all_projects) > 0:
+                    project_table = Table(show_header=True, header_style="bold magenta")
+                    project_table.add_column("Title", style="dim", width=12)
+                    project_table.add_column("ID", style="dim", width=12)
+
+                    found = False
+                    for project in all_projects:
+                        if username == project["leader"]:
+                            project_table.add_row(project['title'], str(project['id']))
+                            found = True
+
+                    if found:
+                        console.print(project_table)
+                    else:
+                        console.print("\nYou are not a leader of any project.", style='dark_orange')
+                else:
+                    console.print("There are no projects yet.")
+            else:
+                console.print('There are no projects yet.')
+        except Exception as e:
+            console.print(f"\nError showing project member: {e}", style='dark_orange')
+>>>>>>> ca95177 (Update Everything)
     
     def MemeberProject(self , username):
         """_show list of projects that user just a member of those_
@@ -361,6 +494,7 @@ class ProjectManager(Project):
         Args:
             username (_type_): _username_
         """
+<<<<<<< HEAD
         clear_screen()
         try:
             AllprojectFile = Path('Projects_Data') / f'project.json'
@@ -379,3 +513,32 @@ class ProjectManager(Project):
                     print("You are not a member of any project.")
         except Exception as e:
             print(f"Error Showing project member: {e}")
+=======
+        console = Console()
+        try:
+            all_project_file = self.data_folder / 'project.json'
+            if os.path.exists(all_project_file):
+                with open(all_project_file, 'r') as file:
+                    all_projects = json.load(file)
+
+                project_table = Table(show_header=True, header_style="bold magenta")
+                project_table.add_column("Title", style="dim", width=20)
+                project_table.add_column("ID", style="dim", width=12)
+
+                found = False
+                for project in all_projects:
+                    for member in project["members"]:
+                        if username == member and username != project["leader"]:
+                            project_table.add_row(project['title'], str(project['id']))
+                            found = True
+                            break
+
+                if found:
+                    console.print(project_table)
+                else:
+                    console.print("\nYou are not a member of any project.", style='dark_orange')
+            else:
+                console.print('There are no projects yet.')
+        except Exception as e:
+            console.print(f"\nError showing project member: {e}", style='dark_orange')
+>>>>>>> ca95177 (Update Everything)

@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> ca95177 (Update Everything)
 import unittest
 from Users.user import User
 import json
@@ -16,4 +19,8 @@ class TestUserManager(unittest.TestCase):
 
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     unittest.main()
+=======
+    unittest.main()
+>>>>>>> ca95177 (Update Everything)

@@ -127,4 +127,8 @@ if __name__ == '__main__':
     if args.command == 'create-admin':
         create_admin(args.username, args.password)
     elif args.command == 'purge-data':
+<<<<<<< HEAD
         purge_data()
+=======
+        purge_data()
+>>>>>>> ca95177 (Update Everything)
