@@ -114,8 +114,4 @@ class UserManager:
     def is_it_theUser(self, username, password, saved_username, saves_password):
         is_it_thePass = self.user.check_password(saves_password, password)
         is_it_theUserN = saved_username== username 
-<<<<<<< HEAD
         return (is_it_theUserN and is_it_thePass)
-=======
-        return (is_it_theUserN and is_it_thePass)
->>>>>>> ca95177 (Update Everything)

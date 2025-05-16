@@ -1,4 +1,4 @@
-from Users.user import UserManager
+from .user import UserManager
 import time, re #for checking email
 from rich.console import Console
 from rich.prompt import Prompt
@@ -36,6 +36,7 @@ class validService:
                 return user
             
         except ValueError as error:
+            console.print('here')
             console.print(f'An error occured: {str(error)}', style='dark_orange')
             time.sleep(2.5)
             return None
@@ -111,8 +112,4 @@ class validService:
             time.sleep(3.5)
         except FileNotFoundError as error:
             console.print(error, style='dark_orange')
-<<<<<<< HEAD
             time.sleep(3.5)
-=======
-            time.sleep(3.5)
->>>>>>> ca95177 (Update Everything)

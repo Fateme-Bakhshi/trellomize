@@ -7,11 +7,7 @@ from rich.panel import Panel
 import logging
 from Projects_And_Tasks.project import ProjectManager
 from Projects_And_Tasks.Projects_menu import Main
-<<<<<<< HEAD
-
-=======
 import shutil
->>>>>>> ca95177 (Update Everything)
 
 
 logging.basicConfig(filename="logFile/actions.log", format='%(asctime)s - %(message)s', filemode='a', level=logging.DEBUG)
@@ -32,13 +28,8 @@ class main:
         time.sleep(1.5)
     
     def show_title(self, title):
-<<<<<<< HEAD
-        self.clear_screen()
-        console = Console()
-=======
         console = Console()
         self.clear_screen()
->>>>>>> ca95177 (Update Everything)
         print('\n')
         console.rule(title, style="bold white")
         time.sleep(1)
@@ -48,8 +39,6 @@ class main:
         for option, title in enumerate(choices):
             console.print(Panel(title,title=str(option+1),title_align="center", width=width, border_style="bold deep_sky_blue1"), justify=justify)
             time.sleep(0.2)
-<<<<<<< HEAD
-=======
             
     def get_choice(self, text):
         columns = shutil.get_terminal_size().columns
@@ -57,7 +46,6 @@ class main:
         print(' ' * spaces + text, end="")
         choice = input()
         return choice
->>>>>>> ca95177 (Update Everything)
     
     def exit_program(self):
         self.clear_screen()
@@ -82,17 +70,10 @@ class main:
         self.print_slowly("\nWelcome to Project Management System!", 0.04)
         
         while True:
-<<<<<<< HEAD
-            self.show_title("[bold deep_sky_blue1]Login/Sign Up")
-            print("\n")
-            self.display_choices(['Login', 'Sign Up', 'Exit'], 12, 'center')
-            choice = input("                                                                 Enter your choice: ")
-=======
             self.show_title("[bold deep_sky_blue3]Login/Sign Up")
             print("\n")
             self.display_choices(['Login', 'Sign Up', 'Exit'], 12, 'center')
             choice = self.get_choice('Enter your choice: ')
->>>>>>> ca95177 (Update Everything)
               
             while True:
                 if(choice == '1'):
@@ -104,11 +85,7 @@ class main:
                 elif(choice == '3'):
                     self.exit_program()
                 else:
-<<<<<<< HEAD
-                    choice = input("                                               Please enter a valid number(1-3): ")
-=======
                     choice = self.get_choice('Please enter a valid number(1-3): ')
->>>>>>> ca95177 (Update Everything)
         
     def login(self):
         self.show_title("[bold deep_sky_blue3]Login")
@@ -149,25 +126,14 @@ class main:
         
             choices = ['Pre-made projects', 'Making a new project']
             if not self.user.is_Manager:
-<<<<<<< HEAD
-                choices.extend(['Back', 'Exit'])
-                self.display_choices(choices, 20, 'center')
-            else:
-                choices.extend(['Deactivating an account', 'Activating an account', 'Back', 'Exit'])
-                self.display_choices(choices, 20, 'center')
-            
-
-            choice2 = input('                                                               Enter your choice: ')
-=======
                 choices.extend(['Log out', 'Exit'])
                 self.display_choices(choices, 20, 'center')
             else:
                 choices.extend(['Deactivating an account', 'Activating an account', 'Log out', 'Exit'])
                 self.display_choices(choices, 20, 'center')
             
-
             choice2 = self.get_choice('Enter your choice: ')
->>>>>>> ca95177 (Update Everything)
+            
             while True:
                 if choice2 == '1':
                     self.Pre_made_projects()
@@ -176,9 +142,6 @@ class main:
                     self.making_new_project()
                     break
                 if (choice2 == '3' and not self.user.is_Manager):
-<<<<<<< HEAD
-                    return
-=======
                     self.clear_screen()
                     answer = input('\nAre you sure you want to log out?(y/n): ')
                     while True:
@@ -192,7 +155,6 @@ class main:
                         else:
                             answer = input('Please enter "y" or "n": ')
                     break
->>>>>>> ca95177 (Update Everything)
                 if (choice2 == '4' and not self.user.is_Manager):
                     self.exit_program()
                 if (choice2 == '3' and self.user.is_Manager):
@@ -202,13 +164,6 @@ class main:
                     self.activating_user()
                     break
                 if (choice2 == '5' and self.user.is_Manager):
-<<<<<<< HEAD
-                    return
-                if (choice2 == '6' and self.user.is_Manager):
-                    self.exit_program()
-                else:
-                    choice2 = input('                                                                  Please enter a valid number: ')
-=======
                     self.clear_screen()
                     answer = input('\nAre you sure you want to log out?(y/n): ')
                     while True:
@@ -226,7 +181,6 @@ class main:
                     self.exit_program()
                 else:
                     choice2 = self.get_choice('Please enter a valid number: ')
->>>>>>> ca95177 (Update Everything)
                 
     def making_new_project(self):
         self.show_title("[bold deep_sky_blue3]New Project")
@@ -245,11 +199,7 @@ class main:
                     ,'Back'
                     ,'Exit']
             self.display_choices(choices, 27, 'center')
-<<<<<<< HEAD
-            choice = input('                                                               Enter your choice: ')
-=======
             choice = self.get_choice('Enter your choice: ')
->>>>>>> ca95177 (Update Everything)
             if choice == '5':
                 break
             if choice == '6':
@@ -282,8 +232,3 @@ class main:
 if __name__ == "__main__":
     m = main()
     m.log_or_sign()
-<<<<<<< HEAD
-    
-=======
-    
->>>>>>> ca95177 (Update Everything)

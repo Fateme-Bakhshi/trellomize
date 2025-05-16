@@ -1,6 +1,6 @@
-from .task import TaskManager
-from .task import TableTask
-from .project import ProjectManager
+from task import TaskManager
+from task import TableTask
+from project import ProjectManager
 import shutil, json #for save file
 from pathlib import Path  #for save file
 import os, logging, time, sys
