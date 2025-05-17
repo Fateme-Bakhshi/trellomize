@@ -94,8 +94,10 @@ trellomize-1.0/
 - Yasaman Saffar Tabasi  
 - Fateme Bakhshi
 
-##
-> Do not delete or rename system folders (Users_Data, Projects_Data, logFile)
-> The project uses a JSON-based storage system (no database required)
-> Final submission tagged as v1.0 in the Releases section
-> This project was developed as the second course project for the "Advanced Programming" class at IUST (Spring 1403).
+### Notes
+
+• Do not delete or rename system folders (`Users_Data`, `Projects_Data`, `logFile`)  
+• The project uses a JSON-based storage system (no database required)  
+• Final submission is tagged as `v1.0` in the Releases section  
+• This project was developed as the second course project for the "Advanced Programming" class at IUST (Spring 1403)
+
