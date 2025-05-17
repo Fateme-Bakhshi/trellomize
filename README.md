@@ -46,4 +46,5 @@ Iran University of Science and Technology — Spring 2024
 ##
 
 > Final submission tagged as v1.0 in the Releases section
-> This project was developed as the first course project for the "Advanced Programming" class at IUST (Spring 1403).
+
+> This project was developed as the second course project for the "Advanced Programming" class at IUST (Spring 1403).
