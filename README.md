@@ -20,14 +20,20 @@ Iran University of Science and Technology — Spring 2024
 ## Getting Started
 1. Create and activate a virtual environment (Python 3.11+)
 2. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
+```
+pip install -r requirements.txt
+```
 3.Set up admin user:
-   ```
-   python ./manager.py create-admin --username (admin's username) --password (admin's password)
-   ```
+```
+python ./manager.py create-admin --username (admin's username) --password (admin's password)
+```
 4.Run the program:
 ```
-    python mainn.py
+python mainn.py
 ```
+
+## Team members
+-Yasaman Saffar Tabasi
+-Fateme Bakhshi
+
+.Final submission tagged as v1.0 in the Releases section
