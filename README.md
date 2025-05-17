@@ -1,4 +1,4 @@
-# trellomize
+# Trellomize
 **Terminal-Based Project Management System**  
 Developed as a mini-project for the Advanced Programming course  
 Department of Mathematics and Computer Science
@@ -19,7 +19,7 @@ Iran University of Science and Technology — Spring 2024
 
 ## Getting Started
 1. Create and activate a virtual environment (Python 3.11+)
-2. Install dependencies:
+2. 2. Install dependencies:
 ```
 pip install -r requirements.txt
 ```
@@ -36,4 +36,5 @@ python mainn.py
 -Yasaman Saffar Tabasi
 -Fateme Bakhshi
 
-.Final submission tagged as v1.0 in the Releases section
+##
+Final submission tagged as v1.0 in the Releases section
